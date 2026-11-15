@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
     url.searchParams.set("suite", path);
     return NextResponse.redirect(url);
   }
-  if (!user && path.startsWith("/admin") && !path.startsWith("/admin/connexion")) {
+  if (!user && path.startsWith("/admin") && !path.startsWith("/admin/connexion") && !path.startsWith("/admin/mot-de-passe")) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin/connexion";
     return NextResponse.redirect(url);
