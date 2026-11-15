@@ -3,6 +3,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
+// Boutons affichés seulement une fois le fournisseur activé dans Supabase (variables Vercel à "1").
+const GOOGLE = process.env.NEXT_PUBLIC_AUTH_GOOGLE === "1";
+const FACEBOOK = process.env.NEXT_PUBLIC_AUTH_FACEBOOK === "1";
+
 export default function AuthForm({ next, camping }: { next: string; camping: string }) {
   const router = useRouter();
   const [mode, setMode] = useState<"signup" | "login">("signup");
@@ -61,9 +65,9 @@ export default function AuthForm({ next, camping }: { next: string; camping: str
         {tab("login", "Se connecter")}{tab("signup", "Créer un compte")}
       </div>
       <form onSubmit={submit} className="card stack" style={{ gap: 16 }}>
-        <button type="button" className="btn" onClick={() => oauth("google")}>{mode === "signup" ? "S'inscrire" : "Se connecter"} avec Google</button>
-        <button type="button" className="btn" onClick={() => oauth("facebook")}>{mode === "signup" ? "S'inscrire" : "Se connecter"} avec Facebook</button>
-        <div className="row muted" style={{ fontSize: 14, gap: 10 }} aria-hidden="true"><span style={{ flex: 1, height: 1, background: "var(--sable-3)" }} />ou avec votre e-mail<span style={{ flex: 1, height: 1, background: "var(--sable-3)" }} /></div>
+        {GOOGLE ? <button type="button" className="btn" onClick={() => oauth("google")}>{mode === "signup" ? "S'inscrire" : "Se connecter"} avec Google</button> : null}
+        {FACEBOOK ? <button type="button" className="btn" onClick={() => oauth("facebook")}>{mode === "signup" ? "S'inscrire" : "Se connecter"} avec Facebook</button> : null}
+        {GOOGLE || FACEBOOK ? <div className="row muted" style={{ fontSize: 14, gap: 10 }} aria-hidden="true"><span style={{ flex: 1, height: 1, background: "var(--sable-3)" }} />ou avec votre e-mail<span style={{ flex: 1, height: 1, background: "var(--sable-3)" }} /></div> : null}
         {mode === "signup" ? (
           <>
             <div className="grid2" style={{ gap: 14 }}>
