@@ -26,7 +26,7 @@ export default function KitchenBoard({ canEdit }: { canEdit: boolean }) {
     const since = new Date(Date.now() - 864e5).toISOString();
     const { data } = await supabaseBrowser()
       .from("orders").select("*, order_items(*)")
-      .not("paid_at", "is", null)
+      .or("paid_at.not.is.null,source.eq.equipe")
       .or(`status.in.(nouvelle,en_preparation,prete),and(status.eq.annulee,updated_at.gte.${since})`)
       .order("created_at");
     setOrders((data ?? []) as Order[]);
@@ -73,7 +73,7 @@ export default function KitchenBoard({ canEdit }: { canEdit: boolean }) {
                 return (
                   <article key={o.id} className="a-card" style={{ padding: 12, display: "flex", flexDirection: "column", gap: 6, borderLeft: `4px solid ${c.accent}`, opacity: c.status === "annulee" ? 0.75 : 1 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
-                      <Link href={`/admin/commandes/${o.id}`} style={{ fontFamily: "var(--display)", fontSize: 20, fontWeight: 700, color: "inherit", textDecoration: "none" }}>#{o.number}</Link>{o.is_demo ? <span className="a-pill nouvelle" style={{ marginLeft: 6 }}>Essai</span> : null}
+                      <Link href={`/admin/commandes/${o.id}`} style={{ fontFamily: "var(--display)", fontSize: 20, fontWeight: 700, color: "inherit", textDecoration: "none" }}>#{o.number}</Link>{o.is_demo ? <span className="a-pill nouvelle" style={{ marginLeft: 6 }}>Essai</span> : null}{!o.paid_at ? <span className="a-pill annulee" style={{ marginLeft: 6 }}>À encaisser</span> : null}
                       <span style={{ fontSize: 12, fontWeight: late ? 700 : 400, color: late ? "var(--rouge)" : "#8a8478" }}>{minutes(o.created_at)} min</span>
                     </div>
                     <div style={{ fontSize: 13, fontWeight: 600 }}>{MODES[o.mode].label} · {o.location}{o.customer_name ? <span className="a-muted" style={{ fontWeight: 400 }}> · {o.customer_name}</span> : null}</div>

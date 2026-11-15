@@ -1,6 +1,6 @@
 "use client";
 import { useState, useTransition } from "react";
-import { notifyReady, sendInvoice, setOrderStatus } from "@/app/admin/actions";
+import { cashOrder, notifyReady, sendInvoice, setOrderStatus } from "@/app/admin/actions";
 import { Icon, useToast } from "./ui";
 import { STATUTS } from "@/lib/format";
 import type { OrderStatus } from "@/lib/types";
@@ -22,7 +22,11 @@ export default function OrderActions({ id, status, canEdit, hasEmail, paid }: { 
         </div>
       ) : null}
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        {canEdit && paid ? <button className="a-btn" disabled={pending} onClick={() => start(async () => { const r = await notifyReady(id); if (r.ok) setCurrent((c) => (c === "nouvelle" || c === "en_preparation" ? "prete" : c)); toast.show(r); })}>Prévenir le client (prête)</button> : null}
+        {canEdit && !paid ? <>
+          <button className="a-btn primary" disabled={pending} onClick={() => start(async () => { toast.show(await cashOrder(id, "terminal")); })}>Encaissée au terminal</button>
+          <button className="a-btn" disabled={pending} onClick={() => start(async () => { toast.show(await cashOrder(id, "especes")); })}>Encaissée en espèces</button>
+        </> : null}
+        {canEdit ? <button className="a-btn" disabled={pending} onClick={() => start(async () => { const r = await notifyReady(id); if (r.ok) setCurrent((c) => (c === "nouvelle" || c === "en_preparation" ? "prete" : c)); toast.show(r); })}>Prévenir le client (prête)</button> : null}
         {paid ? <a className="a-btn" href={`/facture/${id}`} target="_blank" rel="noreferrer">{Icon.doc} Voir la facture</a> : null}
         {canEdit && paid ? (
           <button className="a-btn primary" disabled={pending || !hasEmail} title={hasEmail ? undefined : "Aucune adresse e-mail pour ce client"}

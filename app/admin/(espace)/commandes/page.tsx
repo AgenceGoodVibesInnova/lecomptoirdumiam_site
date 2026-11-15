@@ -11,7 +11,7 @@ export default async function Commandes({ searchParams }: { searchParams: Promis
   const sp = await searchParams;
   const statut = FILTRES.includes(sp.statut as OrderStatus) ? sp.statut! : "toutes";
   const q = (sp.q ?? "").trim();
-  let query = supabase.from("orders").select("*, order_items(name, quantity)").not("paid_at", "is", null).order("created_at", { ascending: false }).limit(300);
+  let query = supabase.from("orders").select("*, order_items(name, quantity)").or("paid_at.not.is.null,source.eq.equipe").order("created_at", { ascending: false }).limit(300);
   if (statut !== "toutes") query = query.eq("status", statut);
   if (q) query = /^\d+$/.test(q) ? query.eq("number", Number(q)) : query.or(`customer_name.ilike.%${q.replace(/[%,()]/g, "")}%,location.ilike.%${q.replace(/[%,()]/g, "")}%`);
   const { data } = await query;
@@ -37,7 +37,7 @@ export default async function Commandes({ searchParams }: { searchParams: Promis
             <tbody>
               {orders.map((o) => (
                 <tr key={o.id}>
-                  <td><Link className="rowlink" href={`/admin/commandes/${o.id}`}>#{o.number}</Link>{o.is_demo ? <> <span className="a-pill nouvelle" title="Paiement simulé">Essai</span></> : null}</td>
+                  <td><Link className="rowlink" href={`/admin/commandes/${o.id}`}>#{o.number}</Link>{o.is_demo ? <> <span className="a-pill nouvelle" title="Paiement simulé">Essai</span></> : null}{!o.paid_at ? <> <span className="a-pill annulee">À encaisser</span></> : null}</td>
                   <td style={{ whiteSpace: "nowrap" }}>{dateHeure(o.created_at)}</td>
                   <td>{o.customer_name || <span className="a-muted">Client</span>}</td>
                   <td>{MODES[o.mode].label} <span className="a-muted">· {o.location}</span></td>

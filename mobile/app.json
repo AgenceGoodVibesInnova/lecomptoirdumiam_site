@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "Le Comptoir du Miam",
+    "slug": "lecomptoirdumiam",
+    "scheme": "lecomptoirdumiam",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#efe8db"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "fr.lecomptoirdumiam.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "fr.lecomptoirdumiam.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#efe8db",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "color": "#272725"
+        }
+      ],
+      "expo-status-bar"
+    ],
+    "experiments": {
+      "typedRoutes": false
+    },
+    "extra": {
+      "siteUrl": "https://www.lecomptoirdumiam.fr",
+      "supabaseUrl": "https://ioxjtmripraiztrdlcod.supabase.co",
+      "supabaseKey": "sb_publishable_6CZ-LOJZLfuedD86htXJjg_D_nu7Fgw"
+    }
+  }
+}

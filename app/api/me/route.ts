@@ -14,5 +14,18 @@ export async function GET(req: Request) {
     admin.from("staff").select("role").eq("user_id", user.id).maybeSingle(),
     loyaltyFor(admin, user.id),
   ]);
-  return NextResponse.json({ email: user.email, profile, settings, loyalty, canOrder: !!settings?.ordering_open || !!staff, staffPreview: !settings?.ordering_open && !!staff });
+  return NextResponse.json({ email: user.email, profile, settings, loyalty, canOrder: !!settings?.ordering_open || !!staff, staffPreview: !settings?.ordering_open && !!staff, staffRole: staff?.role ?? null });
+}
+
+/** Suppression du compte par le client lui-même (exigée par l'App Store). Les commandes restent pour la comptabilité, sans lien au compte. */
+export async function DELETE(req: Request) {
+  const user = await requestUser(req);
+  if (!user) return NextResponse.json({ error: "Non connecté." }, { status: 401 });
+  const admin = supabaseService();
+  const { data: staff } = await admin.from("staff").select("role").eq("user_id", user.id).maybeSingle();
+  if (staff) return NextResponse.json({ error: "Un compte de l'équipe se retire depuis l'administration (Équipe)." }, { status: 400 });
+  await admin.from("push_tokens").delete().eq("user_id", user.id);
+  const { error } = await admin.auth.admin.deleteUser(user.id);
+  if (error) return NextResponse.json({ error: "Suppression impossible. Contactez le restaurant." }, { status: 500 });
+  return NextResponse.json({ ok: true });
 }

@@ -1,7 +1,24 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+// API ouverte à l'application (aperçu web inclus) : authentification par jeton « Bearer », jamais par cookie
+// en cross-origin (« * » sans credentials : le navigateur n'envoie pas les cookies du site).
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "authorization, content-type",
+  "Access-Control-Max-Age": "86400",
+};
+
 export async function middleware(request: NextRequest) {
+  if (request.nextUrl.pathname.startsWith("/api/")) {
+    if (request.method === "OPTIONS") return new NextResponse(null, { status: 204, headers: CORS });
+    if (request.headers.get("authorization")?.startsWith("Bearer ")) {
+      const r = NextResponse.next({ request });
+      Object.entries(CORS).forEach(([k, v]) => r.headers.set(k, v));
+      return r;
+    }
+  }
   let response = NextResponse.next({ request });
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

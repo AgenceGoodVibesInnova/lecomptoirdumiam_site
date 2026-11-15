@@ -8,7 +8,7 @@ const LABEL = { admin: "Administrateur", editeur: "Éditeur", lecteur: "Lecteur"
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   const { email, role, supabase } = await requireStaff();
-  const { count } = await supabase.from("orders").select("id", { count: "exact", head: true }).eq("status", "nouvelle").not("paid_at", "is", null);
+  const { count } = await supabase.from("orders").select("id", { count: "exact", head: true }).eq("status", "nouvelle").or("paid_at.not.is.null,source.eq.equipe");
   return (
     <div className="adm">
       <AdminNav email={email} role={LABEL[role]} pending={count ?? 0} />
