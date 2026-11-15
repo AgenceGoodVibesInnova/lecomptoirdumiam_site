@@ -1,7 +1,12 @@
-// Envoi de SMS transactionnels via Brevo (https://developers.brevo.com/docs/transactional-sms-endpoints).
+// Envoi de SMS « commande prête », par l'un de ces deux moyens :
+// 1. Votre propre téléphone Android, avec l'application gratuite SMS Gateway for Android (https://docs.sms-gate.app),
+//    en mode « Cloud Server » : variables SMSGATE_USER et SMSGATE_PASS (identifiants affichés dans l'application).
+// 2. Brevo (payant, https://developers.brevo.com/docs/transactional-sms-endpoints) : variable BREVO_API_KEY.
 const API = "https://api.brevo.com/v3/transactionalSMS/send";
+const SMSGATE_API = "https://api.sms-gate.app/3rdparty/v1/messages";
 
-export const smsConfigured = () => !!process.env.BREVO_API_KEY;
+const smsGateConfigured = () => !!(process.env.SMSGATE_USER && process.env.SMSGATE_PASS);
+export const smsConfigured = () => smsGateConfigured() || !!process.env.BREVO_API_KEY;
 
 /** Numéro français ou international → format attendu par Brevo (indicatif sans « + », ex. 33612345678). */
 export function normalizePhone(raw: string | null | undefined): string | null {
@@ -13,7 +18,26 @@ export function normalizePhone(raw: string | null | undefined): string | null {
   return /^\d{10,15}$/.test(d) ? d : null;
 }
 
+async function sendViaPhone(recipient: string, content: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const auth = Buffer.from(`${process.env.SMSGATE_USER}:${process.env.SMSGATE_PASS}`).toString("base64");
+  const res = await fetch(SMSGATE_API, {
+    method: "POST",
+    headers: { Authorization: `Basic ${auth}`, "content-type": "application/json" },
+    body: JSON.stringify({ textMessage: { text: content }, phoneNumbers: [`+${recipient}`] }),
+  });
+  if (!res.ok) {
+    console.error("Échec SMS (téléphone relais)", res.status, await res.text().catch(() => ""));
+    return { ok: false, error: res.status === 401 ? "Identifiants du téléphone relais refusés." : "Le téléphone relais n'a pas pu envoyer le SMS. Vérifiez qu'il est allumé et connecté." };
+  }
+  return { ok: true };
+}
+
 export async function sendSms(to: string, content: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (smsGateConfigured()) {
+    const r = normalizePhone(to);
+    if (!r) return { ok: false, error: "Numéro de téléphone invalide." };
+    return sendViaPhone(r, content);
+  }
   const key = process.env.BREVO_API_KEY;
   if (!key) return { ok: false, error: "L'envoi de SMS n'est pas encore configuré (clé Brevo manquante)." };
   const recipient = normalizePhone(to);

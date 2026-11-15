@@ -64,6 +64,12 @@ Les règles sont appliquées dans la base (RLS, `supabase/migrations/0001_init.s
 1. Dans IONOS, créer la boîte `bonjour@lecomptoirdumiam.fr` (ou une autre adresse du domaine).
 2. Dans Vercel, renseigner `SMTP_HOST=smtp.ionos.fr`, `SMTP_PORT=465`, `SMTP_USER`, `SMTP_PASS` (mot de passe de la boîte) et `EMAIL_FROM`.
 
+### 3 bis. SMS « commande prête » depuis votre téléphone (facultatif, gratuit)
+1. Sur un téléphone Android avec votre carte SIM, installer **SMS Gateway for Android** (https://docs.sms-gate.app/installation/).
+2. Dans l'application : activer **Cloud Server**, appuyer sur **Start Service**, valider l'inscription (onglet Sign Up).
+3. Recopier dans Vercel le **username** affiché dans `SMSGATE_USER` et le **password** dans `SMSGATE_PASS` (Secret).
+4. Laisser le téléphone allumé, connecté et en charge au restaurant ; désactiver l'optimisation de batterie pour l'application.
+
 ### 4. Vercel
 1. Importer ce dépôt GitHub.
 2. Renseigner les variables de `.env.example`.
