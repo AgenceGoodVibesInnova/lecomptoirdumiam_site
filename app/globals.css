@@ -1,0 +1,92 @@
+/* Le Comptoir du Miam : sable, anthracite de la planche, jaune de l'éclair */
+:root {
+  --sable: #efe8db;
+  --sable-2: #e3d8c4;
+  --sable-3: #d5c9b4;
+  --papier: #fbf8f2;
+  --encre: #272725;
+  --encre-2: #4b4742;
+  --eclair: #dfdf3e;
+  --olive: #6b6a22;
+  --rouge: #a3361f;
+  --display: "Antonio", "Arial Narrow", sans-serif;
+  --body: "Barlow", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--sable); color: var(--encre); font: 400 17px/1.55 var(--body); }
+a { color: inherit; }
+img { max-width: 100%; }
+:focus-visible { outline: 3px solid var(--encre); outline-offset: 3px; border-radius: 2px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 32px); }
+.disp { font-family: var(--display); text-transform: uppercase; font-weight: 700; line-height: 1.02; margin: 0; text-wrap: balance; }
+.kick { font-family: var(--display); text-transform: uppercase; letter-spacing: .16em; font-size: 13px; font-weight: 600; color: var(--olive); margin: 0; }
+.muted { color: var(--encre-2); }
+.hl { background: linear-gradient(transparent 58%, var(--eclair) 58% 92%, transparent 92%); padding: 0 .05em; }
+.stack { display: flex; flex-direction: column; gap: 16px; }
+.row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.grid4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 900px) { .grid3, .grid4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px) { .grid2, .grid3, .grid4 { grid-template-columns: minmax(0, 1fr); } }
+section { padding: clamp(56px, 8vw, 96px) 0; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 12px 22px; border-radius: 4px;
+  border: 2px solid var(--encre); background: transparent; color: var(--encre); font: 600 16px/1 var(--display); text-transform: uppercase;
+  letter-spacing: .06em; text-decoration: none; cursor: pointer; transition: transform .15s ease, background .15s ease; }
+.btn:hover { transform: translateY(-1px); }
+.btn.primary { background: var(--encre); color: var(--sable); }
+.btn.yellow { background: var(--eclair); border-color: var(--eclair); color: var(--encre); }
+.btn.small { min-height: 38px; padding: 8px 14px; font-size: 14px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+.card { background: var(--papier); border: 1px solid var(--sable-3); border-radius: 8px; padding: 22px; }
+.dark { background: var(--encre); color: var(--sable); }
+.dark .muted { color: var(--sable-3); }
+
+label.lbl, .lbl { font-family: var(--display); text-transform: uppercase; letter-spacing: .14em; font-size: 12px; font-weight: 600; color: var(--encre-2); }
+.field { display: flex; flex-direction: column; gap: 6px; }
+input.in, select.in, textarea.in { min-height: 46px; border: 1.5px solid var(--encre); border-radius: 4px; padding: 10px 12px; font: inherit; font-size: 16px; background: #fff; color: var(--encre); width: 100%; }
+textarea.in { min-height: 90px; }
+.check { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border: 1.5px solid var(--sable-3); border-radius: 6px; background: #fff; cursor: pointer; }
+.check input { width: 22px; height: 22px; accent-color: var(--encre); margin: 1px 0 0; flex: none; }
+.err { color: var(--rouge); font-size: 15px; margin: 0; }
+.ok { color: var(--olive); font-size: 15px; margin: 0; }
+
+.badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; white-space: nowrap; background: var(--sable); color: var(--encre-2); }
+.badge.nouvelle { background: var(--eclair); color: var(--encre); }
+.badge.en_preparation { background: var(--encre); color: var(--sable); }
+.badge.prete { background: #cfe3b0; color: var(--encre); }
+.badge.annulee { background: #f1d0c6; color: var(--rouge); }
+.badge.en_attente_paiement { background: #fff; border: 1px dashed var(--encre-2); }
+
+table.t { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.t th { font-family: var(--display); text-transform: uppercase; letter-spacing: .12em; font-size: 12px; font-weight: 600; color: var(--encre-2); text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--encre); white-space: nowrap; }
+.t td { padding: 12px; border-bottom: 1px solid var(--sable-2); font-size: 15px; vertical-align: middle; }
+.t .num { text-align: right; }
+.scroll { overflow-x: auto; }
+
+/* En-tête et pied du site */
+.top { border-bottom: 1px solid var(--sable-3); background: var(--sable); position: sticky; top: 0; z-index: 10; }
+.top .wrap { min-height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.brand { font-family: var(--display); text-transform: uppercase; font-weight: 700; font-size: 22px; text-decoration: none; }
+.nav { display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: center; }
+.nav a { text-decoration: none; font-weight: 500; }
+.foot { background: var(--encre); color: var(--sable-3); padding: 36px 0; font-size: 15px; }
+.foot .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: center; }
+.foot a { color: var(--sable-3); }
+
+/* Espace de gestion */
+.adm { display: flex; min-height: 100vh; flex-wrap: wrap; background: #f4efe6; }
+.adm-side { flex: 1 1 220px; max-width: 260px; background: var(--encre); color: var(--sable); padding: 22px 16px; display: flex; flex-direction: column; gap: 4px; }
+.adm-side a { color: var(--sable-3); text-decoration: none; padding: 10px 12px; border-radius: 4px; font-weight: 500; }
+.adm-side a:hover, .adm-side a[aria-current="page"] { background: #3b3a36; color: var(--sable); }
+.adm-main { flex: 999 1 560px; min-width: 0; padding: 28px clamp(16px, 3vw, 36px) 64px; display: flex; flex-direction: column; gap: 22px; }
+@media (max-width: 760px) { .adm-side { max-width: none; flex-direction: row; flex-wrap: wrap; } }
+.kpi { background: #fff; border: 1px solid var(--sable-2); border-radius: 8px; padding: 16px 18px; display: flex; flex-direction: column; gap: 4px; }
+.kpi .v { font-family: var(--display); font-size: 36px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.bar { height: 10px; border-radius: 5px; background: var(--encre); }
