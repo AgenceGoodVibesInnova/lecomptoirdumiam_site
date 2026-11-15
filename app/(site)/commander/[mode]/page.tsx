@@ -16,11 +16,14 @@ export default async function CommanderMode({ params, searchParams }: { params: 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect(`/connexion?suite=${encodeURIComponent(`/commander/${mode}${table ? `?t=${table}` : ""}`)}`);
 
-  const [settings, menu, { data: profile }] = await Promise.all([
+  const [settings, menu, { data: profile }, { data: staff }] = await Promise.all([
     getSettings(),
     getMenu(),
     supabase.from("profiles").select("mobilhome").eq("id", user.id).maybeSingle(),
+    supabase.from("staff").select("role").eq("user_id", user.id).maybeSingle(),
   ]);
+  // L'équipe peut tester la commande même quand elle est fermée au public.
+  const preview = !settings.ordering_open && !!staff;
 
   return (
     <section>
@@ -29,7 +32,12 @@ export default async function CommanderMode({ params, searchParams }: { params: 
           <p className="kick">Commander · {MODES[mode].label}{table ? ` · table ${table}` : ""}</p>
           <h1 className="disp" style={{ fontSize: "clamp(36px, 5vw, 56px)" }}>Composez votre commande</h1>
         </div>
-        {settings.ordering_open ? (
+        {preview ? (
+          <p className="card" style={{ background: "#f6f5c2", borderColor: "#d8d55a", margin: 0 }}>
+            <strong>Aperçu équipe</strong> · la commande en ligne est fermée au public (Admin › Réglages). Vous la voyez parce que vous faites partie de l'équipe.
+          </p>
+        ) : null}
+        {settings.ordering_open || preview ? (
           <OrderForm
             mode={mode}
             defaultLocation={mode === "mobilhome" ? profile?.mobilhome ?? "" : table}

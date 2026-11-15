@@ -29,6 +29,18 @@ export default async function Compte() {
           </div>
           <Link href="/commander" className="btn yellow">Passer une commande</Link>
         </div>
+        <div className="grid3">
+          {[
+            ["/commander/mobilhome", "Au mobil-home", profile?.mobilhome ? `Livré au n° ${profile.mobilhome}` : "Livré sur votre emplacement"],
+            ["/commander/emporter", "À emporter", "À récupérer au comptoir"],
+            ["/commander#table", "À table", "Avec votre numéro de table"],
+          ].map(([href, t, d]) => (
+            <Link key={href} href={href} className="card" style={{ textDecoration: "none", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, border: "2px solid var(--encre)" }}>
+              <span><span className="disp" style={{ fontSize: 22, fontWeight: 600, display: "block" }}>{t}</span><span className="muted" style={{ fontSize: 14 }}>{d}</span></span>
+              <span aria-hidden="true" style={{ fontSize: 22 }}>→</span>
+            </Link>
+          ))}
+        </div>
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 2.2fr) minmax(260px, 1fr)", gap: 24, alignItems: "start" }} className="acct">
           <style>{`@media (max-width: 860px){.acct{grid-template-columns:minmax(0,1fr)!important}}`}</style>
           <div className="card stack">

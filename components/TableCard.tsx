@@ -16,7 +16,7 @@ export default function TableCard() {
   }
 
   return (
-    <form onSubmit={go} className="card stack" style={{ gap: 8, minHeight: 140, justifyContent: "center", border: "2px solid var(--encre)" }}>
+    <form id="table" onSubmit={go} className="card stack" style={{ gap: 8, minHeight: 140, justifyContent: "center", border: "2px solid var(--encre)" }}>
       <span className="disp" style={{ fontSize: 28, fontWeight: 600 }}>À table</span>
       <span className="muted">Commandez depuis votre table, on vous sert.</span>
       <div className="row" style={{ gap: 8, flexWrap: "nowrap", marginTop: 4 }}>
