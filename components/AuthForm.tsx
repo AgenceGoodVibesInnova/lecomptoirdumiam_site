@@ -21,6 +21,13 @@ export default function AuthForm({ next, camping }: { next: string; camping: str
     await supabaseBrowser().auth.signInWithOAuth({ provider, options: { redirectTo: callback() } });
   }
 
+  async function forgot() {
+    setMsg({});
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email)) return setMsg({ err: "Indiquez d'abord votre e-mail dans le champ ci-dessus." });
+    await supabaseBrowser().auth.resetPasswordForEmail(f.email, { redirectTo: `${window.location.origin}/mot-de-passe` });
+    setMsg({ ok: "Si un compte existe avec cet e-mail, vous allez recevoir un lien pour choisir un nouveau mot de passe." });
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setMsg({});
@@ -84,6 +91,9 @@ export default function AuthForm({ next, camping }: { next: string; camping: str
         ) : null}
         <div className="field"><label className="lbl" htmlFor="mail">E-mail</label><input id="mail" className="in" type="email" required autoComplete="email" value={f.email} onChange={set("email")} /></div>
         <div className="field"><label className="lbl" htmlFor="mdp">Mot de passe</label><input id="mdp" className="in" type="password" required autoComplete={mode === "signup" ? "new-password" : "current-password"} value={f.password} onChange={set("password")} /></div>
+        {mode === "login" ? (
+          <button type="button" onClick={forgot} style={{ alignSelf: "flex-end", background: "none", border: 0, padding: 0, textDecoration: "underline", cursor: "pointer", font: "inherit", fontSize: 15 }}>Mot de passe oublié ?</button>
+        ) : null}
         {msg.err ? <p className="err" role="alert">{msg.err}</p> : null}
         {msg.ok ? <p className="ok" role="status">{msg.ok}</p> : null}
         <button className="btn primary" disabled={busy}>{busy ? "Un instant…" : mode === "signup" ? "Créer mon compte" : "Se connecter"}</button>
