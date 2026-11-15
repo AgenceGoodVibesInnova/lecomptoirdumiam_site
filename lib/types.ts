@@ -18,6 +18,11 @@ export type Settings = {
   camping_name: string | null;
   opening_label: string | null;
   ordering_open: boolean;
+  legal_name?: string | null;
+  legal_address?: string | null;
+  siret?: string | null;
+  vat_number?: string | null;
+  invoice_footer?: string | null;
 };
 
 export type MenuCategory = { id: string; name: string; moment: string | null; position: number; active: boolean };
@@ -30,6 +35,8 @@ export type MenuItem = {
   available: boolean;
   position: number;
   stock_item_id: string | null;
+  vat_rate: number;
+  cost_cents: number | null;
 };
 export type StockItem = {
   id: string;
@@ -39,8 +46,12 @@ export type StockItem = {
   quantity: number;
   alert_threshold: number;
   updated_at: string;
+  purchase_price_cents: number | null;
+  vat_rate: number;
+  sale_price_cents: number | null;
+  supplier: string | null;
 };
-export type OrderItem = { id: string; name: string; unit_price_cents: number; quantity: number };
+export type OrderItem = { id: string; name: string; unit_price_cents: number; quantity: number; vat_rate?: number };
 export type Order = {
   id: string;
   number: number;
@@ -52,6 +63,10 @@ export type Order = {
   total_cents: number;
   paid_at: string | null;
   created_at: string;
+  customer_name?: string | null;
+  customer_email?: string | null;
+  invoice_number?: string | null;
+  invoiced_at?: string | null;
   order_items?: OrderItem[];
   profiles?: { first_name: string | null; last_name: string | null; email: string | null } | null;
 };

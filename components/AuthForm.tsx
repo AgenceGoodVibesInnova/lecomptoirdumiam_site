@@ -24,7 +24,7 @@ export default function AuthForm({ next, camping }: { next: string; camping: str
   async function forgot() {
     setMsg({});
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email)) return setMsg({ err: "Indiquez d'abord votre e-mail dans le champ ci-dessus." });
-    await supabaseBrowser().auth.resetPasswordForEmail(f.email, { redirectTo: `${window.location.origin}/mot-de-passe` });
+    await fetch("/api/auth/reset", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: f.email }) });
     setMsg({ ok: "Si un compte existe avec cet e-mail, vous allez recevoir un lien pour choisir un nouveau mot de passe." });
   }
 
@@ -41,17 +41,14 @@ export default function AuthForm({ next, camping }: { next: string; camping: str
       router.refresh();
       return;
     }
-    if (f.password.length < 8) { setBusy(false); return setMsg({ err: "Le mot de passe doit faire au moins 8 caractères." }); }
-    const { error } = await sb.auth.signUp({
-      email: f.email,
-      password: f.password,
-      options: {
-        emailRedirectTo: callback(),
-        data: { first_name: f.first_name, last_name: f.last_name, postal_code: f.postal_code, on_camping: f.on_camping, mobilhome: f.on_camping ? f.mobilhome : null },
-      },
+    const res = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...f, mobilhome: f.on_camping ? f.mobilhome : null, next }),
     });
+    const data = await res.json().catch(() => ({}));
     setBusy(false);
-    if (error) return setMsg({ err: error.message.includes("registered") ? "Un compte existe déjà avec cet e-mail. Connectez-vous." : "L'inscription n'a pas abouti. Vérifiez vos informations." });
+    if (!res.ok) return setMsg({ err: data.error ?? "L'inscription n'a pas abouti. Réessayez." });
     setMsg({ ok: "Compte créé ! Cliquez sur le lien reçu par e-mail pour l'activer." });
   }
 

@@ -23,18 +23,20 @@ export async function POST(req: Request) {
 
   // Les prix viennent toujours de la base, jamais du navigateur.
   const { data: menuItems } = await admin
-    .from("menu_items").select("id, name, price_cents, available").in("id", wanted.map((w) => w.id));
+    .from("menu_items").select("id, name, price_cents, available, vat_rate").in("id", wanted.map((w) => w.id));
   const lines = wanted.map((w) => {
     const m = menuItems?.find((x) => x.id === w.id);
-    return m && m.available ? { menu_item_id: m.id, name: m.name, unit_price_cents: m.price_cents, quantity: w.qty } : null;
+    return m && m.available ? { menu_item_id: m.id, name: m.name, unit_price_cents: m.price_cents, quantity: w.qty, vat_rate: Number(m.vat_rate ?? 10) } : null;
   });
   if (lines.some((l) => !l)) return NextResponse.json({ error: "Un article n'est plus disponible. Rechargez la page." }, { status: 409 });
   const total = lines.reduce((s, l) => s + l!.unit_price_cents * l!.quantity, 0);
   if (total <= 0) return NextResponse.json({ error: "Montant invalide." }, { status: 400 });
 
+  const { data: profile } = await admin.from("profiles").select("first_name, last_name").eq("id", user.id).maybeSingle();
+  const customer_name = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || null;
   const { data: order, error } = await admin
     .from("orders")
-    .insert({ user_id: user.id, mode: body.mode, location, note: (body.note ?? "").slice(0, 500) || null, total_cents: total })
+    .insert({ user_id: user.id, mode: body.mode, location, note: (body.note ?? "").slice(0, 500) || null, total_cents: total, customer_name, customer_email: user.email })
     .select("id, number").single();
   if (error || !order) return NextResponse.json({ error: "Commande impossible à enregistrer." }, { status: 500 });
   await admin.from("order_items").insert(lines.map((l) => ({ ...l!, order_id: order.id })));

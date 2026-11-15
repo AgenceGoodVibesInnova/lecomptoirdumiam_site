@@ -8,7 +8,7 @@ stocks épicerie, statistiques, clients, équipe).
 - **Application** : Next.js, hébergée sur Vercel
 - **Base de données et comptes** : Supabase (e-mail + mot de passe, Google, Facebook)
 - **Paiement** : SumUp (API de paiement en ligne)
-- **E-mail de bienvenue** : Resend
+- **E-mails** (inscription, mot de passe, commande, facture, invitation) : SMTP IONOS, gabarit commun `lib/emails/layout.ts`
 - **Nom de domaine** : IONOS (lecomptoirdumiam.fr), relié à Vercel
 
 ## Pages
@@ -21,12 +21,13 @@ stocks épicerie, statistiques, clients, équipe).
 | `/commander/[mode]` | Panier (connexion obligatoire) |
 | `/paiement/[id]` | Paiement SumUp |
 | `/commande/[id]` | Confirmation et suivi |
+| `/facture/[id]` | Facture imprimable (client propriétaire ou équipe) |
 | `/connexion` | Inscription / connexion client |
 | `/compte` | Espace client : historique, infos, « Passer une commande » |
 | `/admin/connexion` | Connexion de l'équipe (lien « Accès administrateur » en pied de page) |
 | `/admin` | Statistiques |
 | `/admin/cuisine` | Écran cuisine en direct |
-| `/admin/commandes` | Toutes les commandes, changement de statut |
+| `/admin/commandes` | Toutes les commandes ; fiche commande, statut, envoi de facture |
 | `/admin/carte` | Plats, prix, disponibilités |
 | `/admin/stocks` | Stocks sec / frais / surgelé, alertes |
 | `/admin/clients` | Fichier clients |
@@ -45,7 +46,7 @@ Les règles sont appliquées dans la base (RLS, `supabase/migrations/0001_init.s
 
 ### 1. Supabase
 1. Créer un projet sur supabase.com (région Europe).
-2. SQL Editor : exécuter `supabase/migrations/0001_init.sql`.
+2. SQL Editor : exécuter `supabase/migrations/0001_init.sql`, puis `0002_couts_factures.sql`.
 3. Authentication > URL Configuration : *Site URL* = `https://lecomptoirdumiam.fr`, et ajouter
    `https://lecomptoirdumiam.fr/**` (et l'adresse Vercel) aux *Redirect URLs*.
 4. Authentication > Providers : activer Google et Facebook (identifiants à créer chez Google Cloud et Meta for Developers).
@@ -59,9 +60,9 @@ Les règles sont appliquées dans la base (RLS, `supabase/migrations/0001_init.s
 1. Sur developer.sumup.com, créer une clé API pour le compte marchand et noter le code marchand.
 2. Vérifier que le paiement en ligne (« Online Payments ») est activé sur le compte.
 
-### 3. Resend (e-mail de bienvenue)
-1. Créer un compte, ajouter le domaine `lecomptoirdumiam.fr` et copier les enregistrements DNS demandés dans IONOS.
-2. Créer une clé API.
+### 3. Envoi des e-mails (IONOS)
+1. Dans IONOS, créer la boîte `bonjour@lecomptoirdumiam.fr` (ou une autre adresse du domaine).
+2. Dans Vercel, renseigner `SMTP_HOST=smtp.ionos.fr`, `SMTP_PORT=465`, `SMTP_USER`, `SMTP_PASS` (mot de passe de la boîte) et `EMAIL_FROM`.
 
 ### 4. Vercel
 1. Importer ce dépôt GitHub.

@@ -22,7 +22,7 @@ export default function AdminLogin({ notice }: { notice?: string }) {
   }
   async function reset() {
     if (!email) return setErr("Indiquez d'abord votre e-mail.");
-    await supabaseBrowser().auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/admin/mot-de-passe` });
+    await fetch("/api/auth/reset", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, next: "/admin/mot-de-passe" }) });
     setErr("Si ce compte existe, un e-mail de réinitialisation vient d'être envoyé.");
   }
 

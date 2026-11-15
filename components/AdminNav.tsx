@@ -3,28 +3,30 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
-const LINKS = [
+const LINKS: [string, string][] = [
   ["/admin", "Tableau de bord"], ["/admin/cuisine", "Écran cuisine"], ["/admin/commandes", "Commandes"],
   ["/admin/carte", "Carte et menus"], ["/admin/stocks", "Stocks épicerie"], ["/admin/clients", "Clients"],
   ["/admin/equipe", "Équipe"], ["/admin/reglages", "Réglages"],
 ];
 
-export default function AdminNav({ email, role }: { email: string; role: string }) {
+export default function AdminNav({ email, role, pending }: { email: string; role: string; pending: number }) {
   const path = usePathname();
   const router = useRouter();
+  const active = (href: string) => (href === "/admin" ? path === "/admin" : path.startsWith(href));
   return (
     <nav className="adm-side" aria-label="Espace administratif">
-      <div className="stack" style={{ gap: 6, padding: "0 12px 14px" }}>
-        <span className="disp" style={{ fontSize: 20 }}>Le Comptoir du Miam</span>
-        <span className="badge" style={{ background: "var(--eclair)", color: "var(--encre)", alignSelf: "flex-start" }}>{role}</span>
-      </div>
+      <span className="brand-s">Le Comptoir du Miam</span>
+      <span className="role">{role}</span>
       {LINKS.map(([href, label]) => (
-        <Link key={href} href={href} aria-current={path === href ? "page" : undefined}>{label}</Link>
+        <Link key={href} href={href} aria-current={active(href) ? "page" : undefined}>
+          {label}
+          {href === "/admin/cuisine" && pending ? <span className="count" aria-label={`${pending} à traiter`}>{pending}</span> : null}
+        </Link>
       ))}
-      <div style={{ marginTop: "auto", padding: "16px 12px 0", fontSize: 13, color: "var(--sable-3)", display: "flex", flexDirection: "column", gap: 8 }}>
+      <div className="foot-s">
+        <a href="/" style={{ padding: 0 }}>Voir le site ↗</a>
         <span style={{ wordBreak: "break-all" }}>{email}</span>
-        <button type="button" onClick={async () => { await supabaseBrowser().auth.signOut(); router.push("/admin/connexion"); }}
-          style={{ background: "none", border: "1px solid var(--sable-3)", color: "var(--sable)", borderRadius: 4, padding: "8px", cursor: "pointer", font: "inherit" }}>Se déconnecter</button>
+        <button type="button" onClick={async () => { await supabaseBrowser().auth.signOut(); router.push("/admin/connexion"); }}>Se déconnecter</button>
       </div>
     </nav>
   );

@@ -7,10 +7,11 @@ export const metadata = { title: "Espace administratif", robots: { index: false 
 const LABEL = { admin: "Administrateur", editeur: "Éditeur", lecteur: "Lecteur" } as const;
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
-  const { email, role } = await requireStaff();
+  const { email, role, supabase } = await requireStaff();
+  const { count } = await supabase.from("orders").select("id", { count: "exact", head: true }).eq("status", "nouvelle").not("paid_at", "is", null);
   return (
     <div className="adm">
-      <AdminNav email={email} role={LABEL[role]} />
+      <AdminNav email={email} role={LABEL[role]} pending={count ?? 0} />
       <div className="adm-main">{children}</div>
     </div>
   );

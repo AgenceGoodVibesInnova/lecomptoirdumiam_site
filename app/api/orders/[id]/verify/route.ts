@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { supabaseServer, supabaseService } from "@/lib/supabase/server";
 import { getCheckout } from "@/lib/sumup";
+import { sendMail } from "@/lib/mailer";
+import { orderConfirmationEmail } from "@/lib/emails/templates";
 
 /** Vérifie le paiement auprès de SumUp (jamais sur la seule parole du navigateur). */
 export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -17,7 +19,13 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
 
   const checkout = await getCheckout(order.sumup_checkout_id);
   if (checkout.status === "PAID") {
-    await admin.from("orders").update({ status: "nouvelle", paid_at: new Date().toISOString() }).eq("id", id).is("paid_at", null);
+    const { data: updated } = await admin.from("orders").update({ status: "nouvelle", paid_at: new Date().toISOString() })
+      .eq("id", id).is("paid_at", null).select("id, number, mode, location, total_cents, customer_email, order_items(name, quantity, unit_price_cents)").maybeSingle();
+    // E-mail de confirmation, envoyé une seule fois (seul l'appel qui a marqué la commande payée l'envoie)
+    if (updated?.customer_email) {
+      await admin.rpc("assign_invoice_number", { p_order: id });
+      await sendMail({ to: updated.customer_email, ...orderConfirmationEmail(updated, updated.order_items ?? []) });
+    }
     return NextResponse.json({ status: "nouvelle" });
   }
   return NextResponse.json({ status: order.status, sumup: checkout.status });
