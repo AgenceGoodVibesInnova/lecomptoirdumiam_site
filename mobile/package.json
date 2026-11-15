@@ -37,7 +37,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "apercu": "expo export --platform web --output-dir dist && rm -rf ../public/app && cp -r dist ../public/app && rm -f ../public/app/metadata.json"
   },
   "private": true
 }

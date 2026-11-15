@@ -7,6 +7,7 @@ export default function Merci() {
       <div className="wrap stack" style={{ maxWidth: 560, gap: 16, textAlign: "center" }}>
         <h1 className="disp" style={{ fontSize: 44 }}>Paiement reçu</h1>
         <p className="muted">Merci ! Votre commande part en cuisine. Vous pouvez revenir à l'application.</p>
+        <p><a className="btn primary" href="/app">Retour à l'application</a></p>
       </div>
     </section>
   );

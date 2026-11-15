@@ -1,6 +1,7 @@
+import { dialog } from "../../lib/dialog";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { Alert, RefreshControl, ScrollView, Text, View } from "react-native";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { Button, Empty, Pill } from "../../components/ui";
 import { api } from "../../lib/api";
 import { euros, heure, MODES, type Mode, type Status } from "../../lib/format";
@@ -31,7 +32,7 @@ export default function Equipe() {
 
   const load = useCallback(async () => {
     try { setOrders((await api<{ orders: StaffOrder[] }>("/api/staff/orders")).orders); }
-    catch (e) { setOrders([]); Alert.alert("Espace équipe", (e as Error).message); }
+    catch (e) { setOrders([]); dialog("Espace équipe", (e as Error).message); }
   }, []);
   useFocusEffect(useCallback(() => { load(); }, [load]));
   useEffect(() => {
@@ -42,14 +43,14 @@ export default function Equipe() {
 
   const act = async (id: string, fn: () => Promise<unknown>, ok?: string) => {
     setBusy(id);
-    try { const r = (await fn()) as { message?: string }; if (ok || r?.message) Alert.alert("C'est fait", r?.message ?? ok); }
-    catch (e) { Alert.alert("Oups", (e as Error).message); }
+    try { const r = (await fn()) as { message?: string }; if (ok || r?.message) dialog("C'est fait", r?.message ?? ok); }
+    catch (e) { dialog("Oups", (e as Error).message); }
     setBusy(null);
     load();
   };
   const move = (o: StaffOrder, status: Status) => act(o.id, () => api(`/api/staff/orders/${o.id}`, { method: "PATCH", body: { status } }));
   const notify = (o: StaffOrder) => act(o.id, () => api(`/api/staff/orders/${o.id}/notify`, { method: "POST", body: {} }));
-  const cash = (o: StaffOrder) => Alert.alert(`Encaisser n° ${o.number}`, euros(o.total_cents), [
+  const cash = (o: StaffOrder) => dialog(`Encaisser n° ${o.number}`, euros(o.total_cents), [
     { text: "Terminal SumUp", onPress: () => act(o.id, () => api(`/api/staff/orders/${o.id}`, { method: "PATCH", body: { payment: "terminal" } }), "Encaissée au terminal.") },
     { text: "Espèces", onPress: () => act(o.id, () => api(`/api/staff/orders/${o.id}`, { method: "PATCH", body: { payment: "especes" } }), "Encaissée en espèces.") },
     { text: "Annuler", style: "cancel" },
@@ -85,7 +86,7 @@ export default function Equipe() {
                     {c.next ? <Button small label={c.next[1]} busy={busy === o.id} onPress={() => move(o, c.next![0])} /> : null}
                     {c.status === "prete" ? <Button small kind="yellow" label={o.sms_ready_sent_at ? "Renvoyer l'avis" : "Prévenir le client"} disabled={busy === o.id} onPress={() => notify(o)} /> : null}
                     {!o.paid_at ? <Button small kind="ghost" label="Encaisser" disabled={busy === o.id} onPress={() => cash(o)} /> : null}
-                    {c.status === "nouvelle" ? <Button small kind="ghost" label="Annuler" disabled={busy === o.id} onPress={() => Alert.alert(`Annuler la n° ${o.number} ?`, undefined, [{ text: "Non", style: "cancel" }, { text: "Oui, annuler", style: "destructive", onPress: () => move(o, "annulee") }])} /> : null}
+                    {c.status === "nouvelle" ? <Button small kind="ghost" label="Annuler" disabled={busy === o.id} onPress={() => dialog(`Annuler la n° ${o.number} ?`, undefined, [{ text: "Non", style: "cancel" }, { text: "Oui, annuler", style: "destructive", onPress: () => move(o, "annulee") }])} /> : null}
                   </View>
                 ) : null}
               </View>

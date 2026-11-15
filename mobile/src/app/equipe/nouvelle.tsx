@@ -1,6 +1,7 @@
+import { dialog } from "../../lib/dialog";
 import { router } from "expo-router";
 import { useState } from "react";
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
 import { MenuList } from "../../components/MenuList";
 import { Button, Choice, Field } from "../../components/ui";
 import { api } from "../../lib/api";
@@ -32,17 +33,17 @@ export default function Nouvelle() {
   });
 
   async function send() {
-    if (!count) return Alert.alert("Commande vide", "Ajoutez au moins un plat.");
-    if (!location.trim()) return Alert.alert(mode === "table" ? "N° de table" : "Repère", mode === "table" ? "Indiquez le numéro de table." : "Indiquez un nom ou un repère pour le retrait.");
+    if (!count) return dialog("Commande vide", "Ajoutez au moins un plat.");
+    if (!location.trim()) return dialog(mode === "table" ? "N° de table" : "Repère", mode === "table" ? "Indiquez le numéro de table." : "Indiquez un nom ou un repère pour le retrait.");
     setBusy(true);
     try {
       const r = await api<{ number: number }>("/api/staff/orders", {
         body: { mode, location, note, payment: pay, customer_name: client.name, customer_email: client.email, customer_phone: client.phone, items: lines.map((l) => ({ id: l.id, qty: l.qty })) },
       });
-      Alert.alert(`Commande n° ${r.number} envoyée`, pay === "plus_tard" ? "Elle est en cuisine. À encaisser plus tard." : "Elle est en cuisine et encaissée.");
+      dialog(`Commande n° ${r.number} envoyée`, pay === "plus_tard" ? "Elle est en cuisine. À encaisser plus tard." : "Elle est en cuisine et encaissée.");
       router.back();
     } catch (e) {
-      Alert.alert("Envoi impossible", (e as Error).message);
+      dialog("Envoi impossible", (e as Error).message);
     }
     setBusy(false);
   }

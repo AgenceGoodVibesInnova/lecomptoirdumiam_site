@@ -1,6 +1,7 @@
+import { dialog } from "../../lib/dialog";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Alert, KeyboardAvoidingView, Linking, Platform, ScrollView, Switch, Text, View } from "react-native";
+import { KeyboardAvoidingView, Linking, Platform, ScrollView, Switch, Text, View } from "react-native";
 import { Button, Field } from "../../components/ui";
 import { api } from "../../lib/api";
 import { SITE } from "../../lib/config";
@@ -29,11 +30,11 @@ export default function Compte() {
   }
 
   function remove() {
-    Alert.alert("Supprimer mon compte ?", "Votre compte, vos tampons de fidélité et vos préférences seront supprimés définitivement. Vos factures restent conservées par le restaurant, comme la loi l'exige.", [
+    dialog("Supprimer mon compte ?", "Votre compte, vos tampons de fidélité et vos préférences seront supprimés définitivement. Vos factures restent conservées par le restaurant, comme la loi l'exige.", [
       { text: "Annuler", style: "cancel" },
       { text: "Supprimer", style: "destructive", onPress: async () => {
         try { await api("/api/me", { method: "DELETE" }); await signOut(); router.replace("/connexion"); }
-        catch (e) { Alert.alert("Suppression impossible", (e as Error).message); }
+        catch (e) { dialog("Suppression impossible", (e as Error).message); }
       } },
     ]);
   }

@@ -1,4 +1,4 @@
-import { Alert } from "react-native";
+import { dialog } from "./dialog";
 import { router } from "expo-router";
 import type { Line } from "./cart";
 import type { Mode, Status } from "./format";
@@ -31,11 +31,11 @@ export async function reorder(o: Order, cart: { start: (m: Mode, l?: string) => 
     if (m?.available) lines.push({ id: m.id, name: m.name, price_cents: m.price_cents, qty: it.quantity });
     else missing.push(it.name);
   }
-  if (!lines.length) return Alert.alert("Recommander", "Ces plats ne sont plus disponibles aujourd'hui.");
+  if (!lines.length) return dialog("Recommander", "Ces plats ne sont plus disponibles aujourd'hui.");
   cart.start(o.mode, o.mode === "mobilhome" ? o.location ?? "" : "");
   cart.fill(lines);
   router.push({ pathname: "/commander/[mode]", params: { mode: o.mode } });
-  if (missing.length) Alert.alert("Quelques plats manquent", `Plus disponible aujourd'hui : ${missing.join(", ")}.`);
+  if (missing.length) dialog("Quelques plats manquent", `Plus disponible aujourd'hui : ${missing.join(", ")}.`);
 }
 
 export const statusTone = (s: Status) => (s === "prete" ? "yellow" : s === "terminee" ? "green" : s === "annulee" ? "red" : "neutral") as "yellow" | "green" | "red" | "neutral";

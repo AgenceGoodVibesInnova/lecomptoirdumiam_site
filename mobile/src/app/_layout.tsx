@@ -5,6 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { CartProvider } from "../lib/cart";
+import { DialogHost } from "../lib/dialog";
 import { SessionProvider } from "../lib/session";
 import { C, F } from "../lib/theme";
 
@@ -33,6 +34,7 @@ export default function RootLayout() {
             <Stack.Screen name="commande/[id]" options={{ title: "MA COMMANDE" }} />
             <Stack.Screen name="equipe/nouvelle" options={{ title: "NOUVELLE COMMANDE" }} />
           </Stack>
+          <DialogHost />
         </CartProvider>
       </SessionProvider>
     </SafeAreaProvider>

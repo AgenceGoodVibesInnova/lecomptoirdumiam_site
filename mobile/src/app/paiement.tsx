@@ -1,8 +1,7 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef } from "react";
-import { ActivityIndicator, Linking, Platform, Text, View } from "react-native";
+import { ActivityIndicator, Platform, Text, View } from "react-native";
 import { WebView } from "react-native-webview";
-import { Button } from "../components/ui";
 import { SITE } from "../lib/config";
 import { useSession } from "../lib/session";
 import { C, S } from "../lib/theme";
@@ -22,11 +21,12 @@ export default function Paiement() {
     router.push({ pathname: "/commande/[id]", params: { id } });
   };
 
-  useEffect(() => { if (Platform.OS === "web" && safe) Linking.openURL(url); }, [safe, url]);
+  // Aperçu web : le paiement s'ouvre dans la même page ; la page « Paiement reçu » ramène à l'application.
+  useEffect(() => { if (Platform.OS === "web" && safe) window.location.href = url; }, [safe, url]);
 
   if (!safe) return <View style={S.pad}><Text style={S.err}>Lien de paiement invalide.</Text></View>;
   if (Platform.OS === "web") {
-    return <View style={S.pad}><Text style={S.body}>Le paiement s'est ouvert dans un nouvel onglet.</Text><Button label="J'ai payé, voir ma commande" onPress={finish} /></View>;
+    return <View style={S.pad}><ActivityIndicator color={C.encre} /><Text style={S.body}>Ouverture du paiement…</Text></View>;
   }
   return (
     <WebView
