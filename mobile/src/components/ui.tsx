@@ -1,5 +1,6 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Haptics from "expo-haptics";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { ActivityIndicator, Platform, Pressable, Text, TextInput, View, type TextInputProps, type ViewStyle } from "react-native";
 import { C, F, S } from "../lib/theme";
 
@@ -28,11 +29,22 @@ export function Button({ label, onPress, kind = "primary", busy, disabled, small
   );
 }
 
-export function Field({ label, hint, ...p }: TextInputProps & { label: string; hint?: string }) {
+export function Field({ label, hint, password, ...p }: TextInputProps & { label: string; hint?: string; password?: boolean }) {
+  const [show, setShow] = useState(false);
   return (
     <View style={{ gap: 6 }}>
       <Text style={S.label}>{label}</Text>
-      <TextInput placeholderTextColor={C.gris} style={S.input} {...p} />
+      {password ? (
+        <View style={{ justifyContent: "center" }}>
+          <TextInput placeholderTextColor={C.gris} style={[S.input, { paddingRight: 52 }]} {...p} secureTextEntry={!show} autoCapitalize="none" autoCorrect={false} />
+          <Pressable onPress={() => setShow((v) => !v)} accessibilityRole="button" accessibilityLabel={show ? "Masquer le mot de passe" : "Afficher le mot de passe"} hitSlop={8}
+            style={{ position: "absolute", right: 6, width: 44, height: 44, alignItems: "center", justifyContent: "center" }}>
+            <Ionicons name={show ? "eye-off-outline" : "eye-outline"} size={22} color={C.encre2} />
+          </Pressable>
+        </View>
+      ) : (
+        <TextInput placeholderTextColor={C.gris} style={S.input} {...p} />
+      )}
       {hint ? <Text style={S.muted}>{hint}</Text> : null}
     </View>
   );

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function AdminLogin({ notice }: { notice?: string }) {
   const router = useRouter();
@@ -29,7 +30,7 @@ export default function AdminLogin({ notice }: { notice?: string }) {
   return (
     <form onSubmit={submit} className="stack" style={{ gap: 16 }}>
       <div className="field"><label className="lbl" htmlFor="a-mail">Identifiant (e-mail)</label><input id="a-mail" className="in" type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} /></div>
-      <div className="field"><label className="lbl" htmlFor="a-mdp">Mot de passe</label><input id="a-mdp" className="in" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} /></div>
+      <div className="field"><label className="lbl" htmlFor="a-mdp">Mot de passe</label><PasswordInput id="a-mdp" className="in" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} /></div>
       {err ? <p className="err" role="alert">{err}</p> : null}
       <button className="btn primary" disabled={busy}>{busy ? "Connexion…" : "Se connecter"}</button>
       <div className="row" style={{ justifyContent: "space-between", fontSize: 14 }}>

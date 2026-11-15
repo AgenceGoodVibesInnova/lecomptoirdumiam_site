@@ -77,7 +77,7 @@ export default function Connexion() {
 
           <Field label="E-mail" value={f.email} onChangeText={set("email")} keyboardType="email-address" autoCapitalize="none" autoComplete="email" textContentType="emailAddress" />
           {tab !== "forgot" ? (
-            <Field label="Mot de passe" value={f.password} onChangeText={set("password")} secureTextEntry autoComplete={tab === "signup" ? "new-password" : "current-password"} textContentType={tab === "signup" ? "newPassword" : "password"} hint={tab === "signup" ? "8 caractères minimum." : undefined} />
+            <Field label="Mot de passe" value={f.password} onChangeText={set("password")} password autoComplete={tab === "signup" ? "new-password" : "current-password"} textContentType={tab === "signup" ? "newPassword" : "password"} hint={tab === "signup" ? "8 caractères minimum." : undefined} />
           ) : null}
 
           {error ? <Text style={S.err} accessibilityRole="alert">{error}</Text> : null}

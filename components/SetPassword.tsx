@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import PasswordInput from "@/components/PasswordInput";
 
 /**
  * Page d'arrivée des liens « invitation » et « mot de passe oublié ».
@@ -49,8 +50,8 @@ export default function SetPassword({ next, back }: { next: string; back: string
       <form onSubmit={submit} className="stack" style={{ width: "100%", maxWidth: 420, background: "var(--sable)", borderRadius: 10, padding: "32px 28px", gap: 16 }}>
         <h1 className="disp" style={{ fontSize: 32 }}>Choisir mon mot de passe</h1>
         {!ready ? <p className="muted">Vérification du lien…</p> : null}
-        <div className="field"><label className="lbl" htmlFor="pw">Nouveau mot de passe</label><input id="pw" className="in" type="password" autoComplete="new-password" value={pw} onChange={(e) => setPw(e.target.value)} disabled={!ready} /></div>
-        <div className="field"><label className="lbl" htmlFor="pw2">Confirmer</label><input id="pw2" className="in" type="password" autoComplete="new-password" value={pw2} onChange={(e) => setPw2(e.target.value)} disabled={!ready} /></div>
+        <div className="field"><label className="lbl" htmlFor="pw">Nouveau mot de passe</label><PasswordInput id="pw" className="in" autoComplete="new-password" value={pw} onChange={(e) => setPw(e.target.value)} disabled={!ready} /></div>
+        <div className="field"><label className="lbl" htmlFor="pw2">Confirmer</label><PasswordInput id="pw2" className="in" autoComplete="new-password" value={pw2} onChange={(e) => setPw2(e.target.value)} disabled={!ready} /></div>
         {err ? <p className="err" role="alert">{err}</p> : null}
         <button className="btn primary" disabled={!ready}>Enregistrer et entrer</button>
         <a href={back} style={{ fontSize: 14 }}>Retour à la connexion</a>

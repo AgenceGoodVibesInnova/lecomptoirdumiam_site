@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import PasswordInput from "@/components/PasswordInput";
 
 // Boutons affichés seulement une fois le fournisseur activé dans Supabase (variables Vercel à "1").
 const GOOGLE = process.env.NEXT_PUBLIC_AUTH_GOOGLE === "1";
@@ -88,7 +89,7 @@ export default function AuthForm({ next, camping }: { next: string; camping: str
           </>
         ) : null}
         <div className="field"><label className="lbl" htmlFor="mail">E-mail</label><input id="mail" className="in" type="email" required autoComplete="email" value={f.email} onChange={set("email")} /></div>
-        <div className="field"><label className="lbl" htmlFor="mdp">Mot de passe</label><input id="mdp" className="in" type="password" required autoComplete={mode === "signup" ? "new-password" : "current-password"} value={f.password} onChange={set("password")} /></div>
+        <div className="field"><label className="lbl" htmlFor="mdp">Mot de passe</label><PasswordInput id="mdp" className="in" required autoComplete={mode === "signup" ? "new-password" : "current-password"} value={f.password} onChange={set("password")} /></div>
         {mode === "login" ? (
           <button type="button" onClick={forgot} style={{ alignSelf: "flex-end", background: "none", border: 0, padding: 0, textDecoration: "underline", cursor: "pointer", font: "inherit", fontSize: 15 }}>Mot de passe oublié ?</button>
         ) : null}
