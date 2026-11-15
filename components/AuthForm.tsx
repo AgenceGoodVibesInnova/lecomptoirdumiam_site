@@ -9,7 +9,7 @@ const FACEBOOK = process.env.NEXT_PUBLIC_AUTH_FACEBOOK === "1";
 
 export default function AuthForm({ next, camping }: { next: string; camping: string }) {
   const router = useRouter();
-  const [mode, setMode] = useState<"signup" | "login">("signup");
+  const [mode, setMode] = useState<"signup" | "login">("login");
   const [f, setF] = useState({ last_name: "", first_name: "", postal_code: "", on_camping: true, mobilhome: "", email: "", password: "" });
   const [msg, setMsg] = useState<{ ok?: string; err?: string }>({});
   const [busy, setBusy] = useState(false);
