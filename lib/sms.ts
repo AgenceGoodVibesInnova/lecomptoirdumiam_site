@@ -45,7 +45,7 @@ export async function sendSms(to: string, content: string): Promise<{ ok: true }
   const res = await fetch(API, {
     method: "POST",
     headers: { "api-key": key, "content-type": "application/json", accept: "application/json" },
-    body: JSON.stringify({ sender: (process.env.SMS_SENDER ?? "LeMiam").slice(0, 11), recipient, content, type: "transactional", tag: "commande-prete", unicodeEnabled: true }),
+    body: JSON.stringify({ sender: (process.env.SMS_SENDER ?? "LeMiam").slice(0, 11), recipient, content, type: "transactional", tag: "commande-prete", unicodeEnabled: !isGsm(content) }),
   });
   if (!res.ok) {
     const txt = await res.text().catch(() => "");
@@ -55,11 +55,20 @@ export async function sendSms(to: string, content: string): Promise<{ ok: true }
   return { ok: true };
 }
 
-/** Texte du SMS selon le mode de commande (sans code STOP : reste transactionnel). */
+// Alphabet GSM 7 bits : un SMS = 160 caractères. Hors de cet alphabet (ê, ç, °, emoji…), le SMS passe en
+// Unicode (70 caractères) et compte double ou triple. Les textes ci-dessous restent dans l'alphabet GSM.
+const GSM = "@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ !\"#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà";
+export const isGsm = (t: string) => [...t].every((c) => GSM.includes(c));
+
+/** Texte du SMS selon le mode de commande (sans code STOP : reste transactionnel ; un seul SMS de 160 caractères). */
 export function readySms(o: { number: number; mode: string; location: string | null; customer_name?: string | null }) {
-  const name = o.customer_name?.split(" ")[0];
+  const first = o.customer_name?.split(" ")[0];
+  const name = first && isGsm(first) ? first : null;
   const hello = name ? `Bonjour ${name}, ` : "Bonjour, ";
-  if (o.mode === "mobilhome") return `${hello}votre commande n°${o.number} est prête : nous l'apportons à votre mobil-home${o.location ? ` (${o.location})` : ""}. Bon appétit ! Le Comptoir du Miam`;
-  if (o.mode === "table") return `${hello}votre commande n°${o.number} est prête, elle arrive à votre table. Bon appétit ! Le Comptoir du Miam`;
-  return `${hello}votre commande n°${o.number} est prête ! Vous pouvez venir la retirer au Comptoir du Miam. À tout de suite !`;
+  let text: string;
+  if (o.mode === "mobilhome") text = `${hello}votre commande ${o.number} est en route vers votre mobil-home${o.location ? ` (${o.location})` : ""}. Bon appétit ! Le Comptoir du Miam`;
+  else if (o.mode === "table") text = `${hello}votre commande ${o.number} arrive à votre table. Bon appétit ! Le Comptoir du Miam`;
+  else text = `${hello}votre commande ${o.number} vous attend au Comptoir du Miam. Vous pouvez venir la retirer. Merci et à tout de suite !`;
+  if (!isGsm(text) || text.length > 160) text = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\x20-\x7E]/g, "").slice(0, 160);
+  return text;
 }
