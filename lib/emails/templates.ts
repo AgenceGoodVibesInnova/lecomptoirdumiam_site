@@ -116,3 +116,21 @@ export function customerCreatedEmail(firstName: string | null, link: string) {
     }),
   };
 }
+
+export function orderReadyEmail(o: { id: string; number: number; mode: string; location: string | null; customer_name?: string | null }) {
+  const site = siteUrl();
+  const name = o.customer_name?.split(" ")[0];
+  const line = o.mode === "mobilhome" ? `Nous l'apportons à votre mobil-home${o.location ? ` (${esc(o.location)})` : ""}.`
+    : o.mode === "table" ? "Elle arrive à votre table."
+    : "Vous pouvez venir la retirer au comptoir.";
+  return {
+    subject: `Votre commande n° ${o.number} est prête !`,
+    ...renderEmail({
+      preheader: `Commande n° ${o.number} prête. ${line.replace(/<[^>]+>/g, "")}`,
+      kicker: `Commande n° ${o.number}`,
+      title: "C'est prêt !",
+      paragraphs: [`${name ? `Bonjour ${esc(name)}, v` : "V"}otre commande est prête. ${line}`, "Bon appétit, et merci d'être passé au Comptoir du Miam."],
+      primary: { label: "Voir ma commande", url: `${site}/commande/${o.id}` },
+    }),
+  };
+}

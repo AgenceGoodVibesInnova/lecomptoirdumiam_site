@@ -3,7 +3,7 @@ import { supabaseServer, supabaseService } from "@/lib/supabase/server";
 import { createCheckout, sumupConfigured } from "@/lib/sumup";
 import { isMode } from "@/lib/format";
 
-type Body = { mode?: string; location?: string; note?: string; items?: { id: string; qty: number }[] };
+type Body = { mode?: string; location?: string; note?: string; phone?: string; items?: { id: string; qty: number }[] };
 
 export async function POST(req: Request) {
   const supabase = await supabaseServer();
@@ -38,11 +38,13 @@ export async function POST(req: Request) {
   const total = lines.reduce((s, l) => s + l!.unit_price_cents * l!.quantity, 0);
   if (total <= 0) return NextResponse.json({ error: "Montant invalide." }, { status: 400 });
 
-  const { data: profile } = await admin.from("profiles").select("first_name, last_name").eq("id", user.id).maybeSingle();
+  const { data: profile } = await admin.from("profiles").select("first_name, last_name, phone").eq("id", user.id).maybeSingle();
+  // Le téléphone saisi à la commande est gardé dans le profil s'il n'y en avait pas.
+  if (body.phone && !profile?.phone) await admin.from("profiles").update({ phone: body.phone.trim().slice(0, 20) }).eq("id", user.id);
   const customer_name = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || null;
   const { data: order, error } = await admin
     .from("orders")
-    .insert({ user_id: user.id, mode: body.mode, location, note: (body.note ?? "").slice(0, 500) || null, total_cents: total, customer_name, customer_email: user.email, is_demo: demo })
+    .insert({ user_id: user.id, mode: body.mode, location, note: (body.note ?? "").slice(0, 500) || null, total_cents: total, customer_name, customer_email: user.email, customer_phone: (body.phone ?? "").trim().slice(0, 20) || null, is_demo: demo })
     .select("id, number").single();
   if (error || !order) return NextResponse.json({ error: "Commande impossible à enregistrer." }, { status: 500 });
   await admin.from("order_items").insert(lines.map((l) => ({ ...l!, order_id: order.id })));

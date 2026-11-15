@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
-import { setOrderStatus } from "@/app/admin/actions";
+import { notifyReady, setOrderStatus } from "@/app/admin/actions";
 import { Icon, useToast } from "@/components/admin/ui";
 import { MODES } from "@/lib/format";
 import type { Order, OrderStatus } from "@/lib/types";
@@ -49,6 +49,11 @@ export default function KitchenBoard({ canEdit }: { canEdit: boolean }) {
     if (!r.ok) toast.show(r);
     await load();
   });
+  const notify = (o: Order) => start(async () => {
+    const r = await notifyReady(o.id);
+    toast.show(r);
+    await load();
+  });
   const minutes = (iso: string) => Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
 
   return (
@@ -74,9 +79,19 @@ export default function KitchenBoard({ canEdit }: { canEdit: boolean }) {
                     <div style={{ fontSize: 13, fontWeight: 600 }}>{MODES[o.mode].label} · {o.location}{o.customer_name ? <span className="a-muted" style={{ fontWeight: 400 }}> · {o.customer_name}</span> : null}</div>
                     <ul style={{ margin: 0, paddingLeft: 16, fontSize: 14 }}>{o.order_items?.map((i) => <li key={i.id}><strong>{i.quantity} ×</strong> {i.name}</li>)}</ul>
                     {o.note ? <p className="a-flash err" style={{ padding: "5px 8px", fontWeight: 600 }}>⚠ {o.note}</p> : null}
+                    {c.status === "prete" ? (
+                      <p style={{ margin: 0, fontSize: 12, color: o.sms_ready_sent_at ? "#2f6b2a" : "#8a8478" }}>
+                        {o.sms_ready_sent_at ? `✓ Client prévenu à ${new Date(o.sms_ready_sent_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" })}` : o.customer_phone ? `Tél. ${o.customer_phone}` : "Pas de téléphone : avis par e-mail"}
+                      </p>
+                    ) : null}
                     {canEdit ? (
                       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 2 }}>
-                        {c.next ? <button className="a-btn sm primary" disabled={pending} onClick={() => move(o, c.next![0])}>{c.next[1]} {Icon.next}</button> : null}
+                        {c.status === "prete" ? (
+                          <button className="a-btn sm primary" disabled={pending} onClick={() => notify(o)} title="Envoie « votre commande est prête » au client">
+                            {o.sms_ready_sent_at ? "Renvoyer l'avis" : "Prévenir le client"}
+                          </button>
+                        ) : null}
+                        {c.next ? <button className={`a-btn sm${c.status === "prete" ? "" : " primary"}`} disabled={pending} onClick={() => move(o, c.next![0])}>{c.next[1]} {Icon.next}</button> : null}
                         {c.back ? <button className="a-btn sm" disabled={pending} onClick={() => move(o, c.back![0])}>{Icon.back} {c.back[1]}</button> : null}
                         {c.status !== "annulee" ? <button className="a-btn sm danger" disabled={pending} onClick={() => { if (confirm(`Annuler la commande #${o.number} ?`)) move(o, "annulee"); }}>Annuler</button> : null}
                       </div>

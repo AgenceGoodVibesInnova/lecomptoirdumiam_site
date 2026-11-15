@@ -10,7 +10,7 @@ const FACEBOOK = process.env.NEXT_PUBLIC_AUTH_FACEBOOK === "1";
 export default function AuthForm({ next, camping }: { next: string; camping: string }) {
   const router = useRouter();
   const [mode, setMode] = useState<"signup" | "login">("login");
-  const [f, setF] = useState({ last_name: "", first_name: "", postal_code: "", on_camping: true, mobilhome: "", email: "", password: "" });
+  const [f, setF] = useState({ last_name: "", first_name: "", phone: "", postal_code: "", on_camping: true, mobilhome: "", email: "", password: "" });
   const [msg, setMsg] = useState<{ ok?: string; err?: string }>({});
   const [busy, setBusy] = useState(false);
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -78,6 +78,7 @@ export default function AuthForm({ next, camping }: { next: string; camping: str
               <div className="field"><label className="lbl" htmlFor="nom">Nom</label><input id="nom" className="in" required autoComplete="family-name" value={f.last_name} onChange={set("last_name")} /></div>
               <div className="field"><label className="lbl" htmlFor="prenom">Prénom</label><input id="prenom" className="in" required autoComplete="given-name" value={f.first_name} onChange={set("first_name")} /></div>
             </div>
+            <div className="field"><label className="lbl" htmlFor="tel">Téléphone mobile</label><input id="tel" className="in" type="tel" inputMode="tel" autoComplete="tel" value={f.phone} onChange={set("phone")} placeholder="06 12 34 56 78" /><span className="muted" style={{ fontSize: 13 }}>Pour être prévenu par SMS quand votre commande est prête.</span></div>
             <div className="field"><label className="lbl" htmlFor="cp">Code postal de résidence</label><input id="cp" className="in" required inputMode="numeric" autoComplete="postal-code" pattern="[0-9]{4,5}" value={f.postal_code} onChange={set("postal_code")} style={{ maxWidth: 180 }} /></div>
             <label className="check" htmlFor="vacances" style={f.on_camping ? { background: "#f4f3c4", borderColor: "var(--encre)" } : undefined}>
               <input id="vacances" type="checkbox" checked={f.on_camping} onChange={set("on_camping")} />

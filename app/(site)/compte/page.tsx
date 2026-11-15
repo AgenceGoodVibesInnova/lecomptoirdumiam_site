@@ -61,7 +61,7 @@ export default async function Compte() {
               </table></div>
             ) : <p className="muted" style={{ margin: 0 }}>Pas encore de commande.</p>}
           </div>
-          <ProfileForm profile={{ first_name: profile?.first_name ?? "", last_name: profile?.last_name ?? "", postal_code: profile?.postal_code ?? "", on_camping: !!profile?.on_camping, mobilhome: profile?.mobilhome ?? "" }} userId={user.id} />
+          <ProfileForm profile={{ first_name: profile?.first_name ?? "", last_name: profile?.last_name ?? "", phone: profile?.phone ?? "", postal_code: profile?.postal_code ?? "", on_camping: !!profile?.on_camping, mobilhome: profile?.mobilhome ?? "" }} userId={user.id} />
         </div>
       </div>
     </section>

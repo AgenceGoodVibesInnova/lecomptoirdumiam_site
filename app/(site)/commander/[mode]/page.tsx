@@ -19,7 +19,7 @@ export default async function CommanderMode({ params, searchParams }: { params: 
   const [settings, menu, { data: profile }, { data: staff }] = await Promise.all([
     getSettings(),
     getMenu(),
-    supabase.from("profiles").select("mobilhome").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("mobilhome, phone").eq("id", user.id).maybeSingle(),
     supabase.from("staff").select("role").eq("user_id", user.id).maybeSingle(),
   ]);
   // L'équipe peut tester la commande même quand elle est fermée au public.
@@ -41,6 +41,7 @@ export default async function CommanderMode({ params, searchParams }: { params: 
           <OrderForm
             mode={mode}
             defaultLocation={mode === "mobilhome" ? profile?.mobilhome ?? "" : table}
+            defaultPhone={profile?.phone ?? ""}
             menu={menu.map((c) => ({ id: c.id, name: c.name, items: c.items.filter((i) => i.available).map((i) => ({ id: i.id, name: i.name, description: i.description, price_cents: i.price_cents })) }))}
           />
         ) : (

@@ -7,11 +7,12 @@ import type { Mode } from "@/lib/types";
 type Item = { id: string; name: string; description: string | null; price_cents: number };
 type Cat = { id: string; name: string; items: Item[] };
 
-export default function OrderForm({ mode, menu, defaultLocation }: { mode: Mode; menu: Cat[]; defaultLocation: string }) {
+export default function OrderForm({ mode, menu, defaultLocation, defaultPhone }: { mode: Mode; menu: Cat[]; defaultLocation: string; defaultPhone: string }) {
   const router = useRouter();
   const [cart, setCart] = useState<Record<string, number>>({});
   const [location, setLocation] = useState(defaultLocation);
   const [note, setNote] = useState("");
+  const [phone, setPhone] = useState(defaultPhone);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -35,7 +36,7 @@ export default function OrderForm({ mode, menu, defaultLocation }: { mode: Mode;
     const res = await fetch("/api/orders", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mode, location, note, items: lines.map((l) => ({ id: l.id, qty: l.qty })) }),
+      body: JSON.stringify({ mode, location, note, phone, items: lines.map((l) => ({ id: l.id, qty: l.qty })) }),
     });
     const data = await res.json().catch(() => ({}));
     setBusy(false);
@@ -86,6 +87,10 @@ export default function OrderForm({ mode, menu, defaultLocation }: { mode: Mode;
           <label className="lbl" htmlFor="lieu">{MODES[mode].lieu}</label>
           <input id="lieu" className="in" value={location} onChange={(e) => setLocation(e.target.value)} placeholder={MODES[mode].aide} inputMode={mode === "table" ? "numeric" : undefined} />
           {mode === "table" ? <span className="muted" style={{ fontSize: 13 }}>Changé de table ? Modifiez simplement le numéro.</span> : null}
+        </div>
+        <div className="field">
+          <label className="lbl" htmlFor="phone">Téléphone mobile</label>
+          <input id="phone" className="in" type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Pour être prévenu par SMS" />
         </div>
         <div className="field">
           <label className="lbl" htmlFor="note">Remarque (allergies, précisions)</label>

@@ -4,7 +4,8 @@ import { requireStaff } from "@/lib/auth";
 import { supabaseService } from "@/lib/supabase/server";
 import { makeAuthLink } from "@/lib/authlinks";
 import { sendMail } from "@/lib/mailer";
-import { customerCreatedEmail, invoiceEmail, inviteEmail } from "@/lib/emails/templates";
+import { readySms, sendSms, smsConfigured } from "@/lib/sms";
+import { customerCreatedEmail, invoiceEmail, inviteEmail, orderReadyEmail } from "@/lib/emails/templates";
 import type { OrderStatus, Role } from "@/lib/types";
 
 /** Résultat renvoyé à l'interface : jamais d'exception silencieuse. */
@@ -39,6 +40,42 @@ export async function setOrderStatus(id: string, status: OrderStatus): Promise<R
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
     check(error);
   }, ["/admin/commandes", "/admin/cuisine", `/admin/commandes/${id}`]);
+}
+
+/**
+ * Prévient le client que sa commande est prête : SMS si un service SMS est branché et que le numéro est connu,
+ * e-mail dans tous les cas (gratuit). Passe la commande en « Prête » si besoin.
+ */
+export async function notifyReady(id: string): Promise<Result> {
+  return run(async () => {
+    await requireStaff("editeur");
+    const admin = supabaseService();
+    const { data: o, error } = await admin.from("orders").select("id, number, mode, location, status, customer_name, customer_phone, customer_email, user_id").eq("id", id).single();
+    check(error);
+    if (!o) throw new Error("Commande introuvable.");
+    let phone = o.customer_phone as string | null;
+    let email = o.customer_email as string | null;
+    if ((!phone || !email) && o.user_id) {
+      const p = (await admin.from("profiles").select("phone, email").eq("id", o.user_id).single()).data;
+      phone = phone ?? p?.phone ?? null;
+      email = email ?? p?.email ?? null;
+    }
+    const sent: string[] = [];
+    const problems: string[] = [];
+    if (phone && smsConfigured()) {
+      const r = await sendSms(phone, readySms(o));
+      if (r.ok) sent.push("SMS"); else problems.push(r.error);
+    }
+    if (email) {
+      if (await sendMail({ to: email, ...orderReadyEmail(o) })) sent.push("e-mail"); else problems.push("L'e-mail n'a pas pu partir.");
+    }
+    if (!sent.length) throw new Error(problems[0] ?? "Ni téléphone ni e-mail pour ce client.");
+    const patch: Record<string, unknown> = { sms_ready_sent_at: new Date().toISOString() };
+    if (o.status === "nouvelle" || o.status === "en_preparation") patch.status = "prete";
+    const { error: e2 } = await admin.from("orders").update(patch).eq("id", id);
+    check(e2);
+    return { ok: true, message: `Client prévenu par ${sent.join(" et ")} (commande n°${o.number}).${problems.length ? " " + problems[0] : ""}` };
+  }, ["/admin/cuisine", `/admin/commandes/${id}`, "/admin/commandes"]);
 }
 
 export async function sendInvoice(id: string): Promise<Result> {
