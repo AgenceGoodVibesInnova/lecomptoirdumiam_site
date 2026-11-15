@@ -37,7 +37,7 @@ export default async function Commandes({ searchParams }: { searchParams: Promis
             <tbody>
               {orders.map((o) => (
                 <tr key={o.id}>
-                  <td><Link className="rowlink" href={`/admin/commandes/${o.id}`}>#{o.number}</Link></td>
+                  <td><Link className="rowlink" href={`/admin/commandes/${o.id}`}>#{o.number}</Link>{o.is_demo ? <> <span className="a-pill nouvelle" title="Paiement simulé">Essai</span></> : null}</td>
                   <td style={{ whiteSpace: "nowrap" }}>{dateHeure(o.created_at)}</td>
                   <td>{o.customer_name || <span className="a-muted">Client</span>}</td>
                   <td>{MODES[o.mode].label} <span className="a-muted">· {o.location}</span></td>

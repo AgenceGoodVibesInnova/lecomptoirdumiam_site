@@ -67,6 +67,7 @@ export type Order = {
   customer_email?: string | null;
   invoice_number?: string | null;
   invoiced_at?: string | null;
+  is_demo?: boolean;
   order_items?: OrderItem[];
   profiles?: { first_name: string | null; last_name: string | null; email: string | null } | null;
 };

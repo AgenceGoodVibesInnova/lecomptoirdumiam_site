@@ -53,6 +53,7 @@ export default async function Facture({ params }: { params: Promise<{ id: string
         <PrintButton />
       </div>
       <article className="invoice">
+        {o.is_demo ? <p style={{ margin: "0 0 18px", padding: "8px 12px", background: "#f6f5c2", border: "1px solid #d8d55a", borderRadius: 4, fontWeight: 600, fontSize: 13 }}>FACTURE D'ESSAI · paiement simulé, document sans valeur comptable</p> : null}
         <header style={{ display: "flex", justifyContent: "space-between", gap: 24, flexWrap: "wrap", alignItems: "flex-start" }}>
           <div>
             <img src="/logo.png" alt="Le Comptoir du Miam" style={{ width: 130 }} />
@@ -100,7 +101,7 @@ export default async function Facture({ params }: { params: Promise<{ id: string
         </div>
 
         <footer style={{ marginTop: 36, fontSize: 12, color: "var(--encre-2)", borderTop: "1px solid var(--sable-2)", paddingTop: 12 }}>
-          Payée le {new Date(o.paid_at!).toLocaleDateString("fr-FR", { timeZone: "Europe/Paris" })} par carte bancaire (SumUp).
+          {o.is_demo ? "Paiement simulé (essai) le " : "Payée le "}{new Date(o.paid_at!).toLocaleDateString("fr-FR", { timeZone: "Europe/Paris" })}{o.is_demo ? "." : " par carte bancaire (SumUp)."}
           {s.invoice_footer ? <div style={{ marginTop: 6, whiteSpace: "pre-line" }}>{s.invoice_footer}</div> : null}
         </footer>
       </article>

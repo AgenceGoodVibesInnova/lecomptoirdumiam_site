@@ -37,16 +37,18 @@ export function welcomeEmail(firstName: string | null) {
   };
 }
 
-export function orderConfirmationEmail(o: { id: string; number: number; mode: string; location: string | null; total_cents: number; customer_name?: string | null }, items: { name: string; quantity: number; unit_price_cents: number }[]) {
+export function orderConfirmationEmail(o: { id: string; number: number; mode: string; location: string | null; total_cents: number; customer_name?: string | null; is_demo?: boolean }, items: { name: string; quantity: number; unit_price_cents: number }[]) {
   const site = siteUrl();
   return {
-    subject: `Commande n° ${o.number} confirmée · Le Comptoir du Miam`,
+    subject: `${o.is_demo ? "[Essai] " : ""}Commande n° ${o.number} confirmée · Le Comptoir du Miam`,
     ...renderEmail({
       preheader: `Merci ! Votre commande n° ${o.number} est en préparation.`,
       kicker: `Commande n° ${o.number}`,
       title: "Merci, c'est parti !",
       paragraphs: [
-        `Votre paiement est bien reçu. Votre commande est ${esc(MODE[o.mode] ?? "")}${o.location ? ` (${esc(o.location)})` : ""}.`,
+        o.is_demo
+          ? `Commande d'essai : le paiement a été simulé, rien n'a été débité. Votre commande est ${esc(MODE[o.mode] ?? "")}${o.location ? ` (${esc(o.location)})` : ""}.`
+          : `Votre paiement est bien reçu. Votre commande est ${esc(MODE[o.mode] ?? "")}${o.location ? ` (${esc(o.location)})` : ""}.`,
         "Vous pouvez suivre son avancement et télécharger votre facture à tout moment.",
       ],
       body: orderTable(items, o.total_cents),

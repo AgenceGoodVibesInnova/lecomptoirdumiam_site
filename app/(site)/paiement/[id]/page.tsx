@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import SumUpWidget from "@/components/SumUpWidget";
+import DemoPayment from "@/components/DemoPayment";
 import { supabaseServer } from "@/lib/supabase/server";
 import { euros } from "@/lib/format";
 
@@ -20,8 +21,10 @@ export default async function Paiement({ params }: { params: Promise<{ id: strin
       <div className="wrap stack" style={{ maxWidth: 560, gap: 20 }}>
         <p className="kick">Commande n° {order.number}</p>
         <h1 className="disp" style={{ fontSize: 48 }}>Paiement</h1>
-        <p className="muted" style={{ margin: 0 }}>Montant à régler : <strong style={{ color: "var(--encre)" }}>{euros(order.total_cents)}</strong>. Paiement sécurisé par SumUp.</p>
-        {order.sumup_checkout_id ? <SumUpWidget orderId={order.id} checkoutId={order.sumup_checkout_id} /> : <p className="err">Le paiement n'a pas été préparé. Recommencez la commande.</p>}
+        <p className="muted" style={{ margin: 0 }}>Montant à régler : <strong style={{ color: "var(--encre)" }}>{euros(order.total_cents)}</strong>.{order.sumup_checkout_id?.startsWith("demo-") ? "" : " Paiement sécurisé par SumUp."}</p>
+        {!order.sumup_checkout_id ? <p className="err">Le paiement n'a pas été préparé. Recommencez la commande.</p>
+          : order.sumup_checkout_id.startsWith("demo-") ? <DemoPayment orderId={order.id} total={order.total_cents} />
+          : <SumUpWidget orderId={order.id} checkoutId={order.sumup_checkout_id} />}
       </div>
     </section>
   );

@@ -14,3 +14,6 @@ delete from public.stock_items where name like '% · test';
 -- Carte et stocks d'exemple (supabase/produits-demo.sql)
 delete from public.menu_items where is_demo;
 delete from public.stock_items where is_demo;
+
+-- Commandes passées avec le paiement simulé
+delete from public.orders where is_demo;

@@ -29,7 +29,7 @@ export default async function Commande({ params }: { params: Promise<{ id: strin
       <Link href="/admin/commandes" className="a-btn sm" style={{ alignSelf: "flex-start" }}>{Icon.back} Toutes les commandes</Link>
       <div className="a-head">
         <div><p className="a-kick">{dateHeure(o.created_at)} · {MODES[o.mode].label}</p><h1 className="a-title">Commande #{o.number}</h1></div>
-        <span className={`a-pill ${o.status}`} style={{ fontSize: 13, padding: "4px 12px" }}>{STATUTS[o.status]}</span>
+        <span style={{ display: "flex", gap: 6 }}>{o.is_demo ? <span className="a-pill nouvelle" style={{ fontSize: 13, padding: "4px 12px" }}>Paiement simulé</span> : null}<span className={`a-pill ${o.status}`} style={{ fontSize: 13, padding: "4px 12px" }}>{STATUTS[o.status]}</span></span>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.7fr) minmax(280px, 1fr)", gap: 14, alignItems: "start" }} className="order-grid">
         <style>{`@media (max-width: 960px){.order-grid{grid-template-columns:minmax(0,1fr)!important}}`}</style>

@@ -2,6 +2,9 @@
 // Documentation : https://developer.sumup.com — à vérifier lors de la mise en service.
 const API = "https://api.sumup.com/v0.1";
 
+/** SumUp est-il branché (clé API et code marchand renseignés) ? Sinon : paiement simulé pour l'équipe. */
+export const sumupConfigured = () => !!(process.env.SUMUP_API_KEY && process.env.SUMUP_MERCHANT_CODE);
+
 function headers() {
   const key = process.env.SUMUP_API_KEY;
   if (!key) throw new Error("SUMUP_API_KEY manquante");

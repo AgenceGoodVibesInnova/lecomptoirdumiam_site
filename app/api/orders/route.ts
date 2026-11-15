@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseServer, supabaseService } from "@/lib/supabase/server";
-import { createCheckout } from "@/lib/sumup";
+import { createCheckout, sumupConfigured } from "@/lib/sumup";
 import { isMode } from "@/lib/format";
 
 type Body = { mode?: string; location?: string; note?: string; items?: { id: string; qty: number }[] };
@@ -23,6 +23,9 @@ export async function POST(req: Request) {
     const { data: staff } = await admin.from("staff").select("role").eq("user_id", user.id).maybeSingle();
     if (!staff) return NextResponse.json({ error: "La commande en ligne n'est pas encore ouverte." }, { status: 403 });
   }
+  // Sans SumUp, seul le paiement simulé est possible, et seulement tant que la commande est fermée au public.
+  const demo = !sumupConfigured();
+  if (demo && settings?.ordering_open) return NextResponse.json({ error: "Le paiement en ligne n'est pas encore configuré. Contactez le restaurant." }, { status: 503 });
 
   // Les prix viennent toujours de la base, jamais du navigateur.
   const { data: menuItems } = await admin
@@ -39,11 +42,15 @@ export async function POST(req: Request) {
   const customer_name = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || null;
   const { data: order, error } = await admin
     .from("orders")
-    .insert({ user_id: user.id, mode: body.mode, location, note: (body.note ?? "").slice(0, 500) || null, total_cents: total, customer_name, customer_email: user.email })
+    .insert({ user_id: user.id, mode: body.mode, location, note: (body.note ?? "").slice(0, 500) || null, total_cents: total, customer_name, customer_email: user.email, is_demo: demo })
     .select("id, number").single();
   if (error || !order) return NextResponse.json({ error: "Commande impossible à enregistrer." }, { status: 500 });
   await admin.from("order_items").insert(lines.map((l) => ({ ...l!, order_id: order.id })));
 
+  if (demo) {
+    await admin.from("orders").update({ sumup_checkout_id: `demo-${order.id}` }).eq("id", order.id);
+    return NextResponse.json({ id: order.id });
+  }
   try {
     const checkout = await createCheckout({ reference: order.id, amountCents: total, description: `Le Comptoir du Miam · commande n° ${order.number}` });
     await admin.from("orders").update({ sumup_checkout_id: checkout.id }).eq("id", order.id);
