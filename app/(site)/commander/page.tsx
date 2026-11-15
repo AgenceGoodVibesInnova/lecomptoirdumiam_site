@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getSettings } from "@/lib/settings";
+import TableCard from "@/components/TableCard";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Commander en ligne" };
@@ -7,7 +8,6 @@ export const metadata = { title: "Commander en ligne" };
 const OPTIONS = [
   { href: "/commander/mobilhome", title: "Depuis votre mobil-home", text: "On vous apporte votre commande sur votre emplacement." },
   { href: "/commander/emporter", title: "À emporter au comptoir", text: "Commandez, puis récupérez au comptoir sans attendre." },
-  { href: "/commander/table", title: "À table", text: "Commandez depuis votre table, on vous sert." },
 ];
 
 export default async function Commander() {
@@ -41,6 +41,7 @@ export default async function Commander() {
               <span style={{ fontWeight: 600, fontSize: 15 }}>Se connecter ou créer un compte →</span>
             </Link>
           ))}
+          <TableCard />
         </div>
       </div>
     </section>

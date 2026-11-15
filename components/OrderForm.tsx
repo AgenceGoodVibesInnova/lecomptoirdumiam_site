@@ -84,7 +84,8 @@ export default function OrderForm({ mode, menu, defaultLocation }: { mode: Mode;
         ) : <p className="muted" style={{ margin: 0 }}>Votre panier est vide.</p>}
         <div className="field">
           <label className="lbl" htmlFor="lieu">{MODES[mode].lieu}</label>
-          <input id="lieu" className="in" value={location} onChange={(e) => setLocation(e.target.value)} placeholder={MODES[mode].aide} />
+          <input id="lieu" className="in" value={location} onChange={(e) => setLocation(e.target.value)} placeholder={MODES[mode].aide} inputMode={mode === "table" ? "numeric" : undefined} />
+          {mode === "table" ? <span className="muted" style={{ fontSize: 13 }}>Changé de table ? Modifiez simplement le numéro.</span> : null}
         </div>
         <div className="field">
           <label className="lbl" htmlFor="note">Remarque (allergies, précisions)</label>
