@@ -14,6 +14,11 @@ export default function SettingsForm({ s, canEdit }: { s: Settings; canEdit: boo
         <fieldset disabled={!canEdit} className="a-card a-card-pad a-form" style={{ margin: 0 }}>
           <h3 style={{ marginTop: 0 }}>Commande en ligne</h3>
           <label className="a-check"><input type="checkbox" name="ordering_open" defaultChecked={s.ordering_open} /> <span><strong>Commande en ligne ouverte</strong> · décochez pour la suspendre (fermeture, coup de feu…)</span></label>
+          <h3>Carte de fidélité</h3>
+          <label className="a-check span"><input type="checkbox" name="loyalty_enabled" defaultChecked={s.loyalty_enabled ?? true} /> <span><strong>Fidélité active</strong> · un tampon par commande payée</span></label>
+          <Field label="Tampons pour une récompense" htmlFor="loyalty_goal"><input id="loyalty_goal" name="loyalty_goal" type="number" min={2} max={50} defaultValue={s.loyalty_goal ?? 10} /></Field>
+          <Field label="Valeur de la récompense (€)" htmlFor="loyalty_reward"><input id="loyalty_reward" name="loyalty_reward" inputMode="decimal" defaultValue={((s.loyalty_reward_cents ?? 500) / 100).toFixed(2).replace(".", ",")} /></Field>
+          <Field label="Texte de la récompense" htmlFor="loyalty_reward_label" span><input id="loyalty_reward_label" name="loyalty_reward_label" defaultValue={s.loyalty_reward_label ?? "5 € offerts sur votre commande"} /></Field>
           <h3>Infos affichées sur le site</h3>
           <Field label="Bandeau d'ouverture" htmlFor="opening_label" span><input id="opening_label" name="opening_label" defaultValue={v("opening_label")} /></Field>
           <Field label="Nom du camping" htmlFor="camping_name"><input id="camping_name" name="camping_name" defaultValue={v("camping_name")} /></Field>

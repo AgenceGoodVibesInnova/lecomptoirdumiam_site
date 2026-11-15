@@ -5,6 +5,7 @@ import { supabaseService } from "@/lib/supabase/server";
 import { makeAuthLink } from "@/lib/authlinks";
 import { sendMail } from "@/lib/mailer";
 import { readySms, sendSms, smsConfigured } from "@/lib/sms";
+import { pushToUser } from "@/lib/push";
 import { customerCreatedEmail, invoiceEmail, inviteEmail, orderReadyEmail } from "@/lib/emails/templates";
 import type { OrderStatus, Role } from "@/lib/types";
 
@@ -62,7 +63,14 @@ export async function notifyReady(id: string): Promise<Result> {
     }
     const sent: string[] = [];
     const problems: string[] = [];
-    if (phone && smsConfigured()) {
+    // 1. Notification de l'application (gratuite). 2. SMS seulement si le client n'a pas l'application.
+    const pushed = o.user_id ? await pushToUser(admin, o.user_id, {
+      title: `Commande n° ${o.number} prête !`,
+      body: o.mode === "mobilhome" ? "Elle part vers votre mobil-home. Bon appétit !" : o.mode === "table" ? "Elle arrive à votre table. Bon appétit !" : "Vous pouvez venir la retirer au comptoir.",
+      data: { orderId: o.id },
+    }) : 0;
+    if (pushed) sent.push("notification");
+    if (!pushed && phone && smsConfigured()) {
       const r = await sendSms(phone, readySms(o));
       if (r.ok) sent.push("SMS"); else problems.push(r.error);
     }
@@ -228,6 +236,16 @@ export async function saveSettings(_: Result | null, fd: FormData): Promise<Resu
     const keys = ["address", "hours", "phone", "contact_email", "instagram_url", "ubereats_url", "camping_name", "opening_label", "legal_name", "legal_address", "siret", "vat_number", "invoice_footer"] as const;
     const row: Record<string, unknown> = { ordering_open: fd.get("ordering_open") === "on", updated_at: new Date().toISOString() };
     for (const k of keys) row[k] = str(fd, k) || null;
+    if (fd.has("loyalty_goal")) {
+      row.loyalty_enabled = fd.get("loyalty_enabled") === "on";
+      const goal = Number(str(fd, "loyalty_goal"));
+      if (!Number.isInteger(goal) || goal < 2 || goal > 50) throw new Error("Le nombre de tampons doit être entre 2 et 50.");
+      row.loyalty_goal = goal;
+      const cents = Math.round(Number(str(fd, "loyalty_reward").replace(",", ".")) * 100);
+      if (!Number.isFinite(cents) || cents < 0) throw new Error("Valeur de récompense invalide.");
+      row.loyalty_reward_cents = cents;
+      row.loyalty_reward_label = str(fd, "loyalty_reward_label") || `${(cents / 100).toFixed(2).replace(".", ",")} € offerts sur votre commande`;
+    }
     const { error } = await supabase.from("settings").update(row).eq("id", 1);
     check(error);
     return { ok: true, message: "Réglages enregistrés." };

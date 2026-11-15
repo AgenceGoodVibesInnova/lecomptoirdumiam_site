@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { euros } from "@/lib/format";
 
 /** Paiement simulé, affiché tant que SumUp n'est pas branché (équipe uniquement). */
-export default function DemoPayment({ orderId, total }: { orderId: string; total: number }) {
+export default function DemoPayment({ orderId, total, payToken, doneUrl }: { orderId: string; total: number; payToken?: string; doneUrl?: string }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
@@ -12,9 +12,9 @@ export default function DemoPayment({ orderId, total }: { orderId: string; total
   async function pay() {
     setBusy(true);
     setErr("");
-    const res = await fetch(`/api/orders/${orderId}/verify`, { method: "POST" });
+    const res = await fetch(`/api/orders/${orderId}/verify${payToken ? `?k=${payToken}` : ""}`, { method: "POST" });
     const data = await res.json().catch(() => ({}));
-    if (data.status === "nouvelle") return router.replace(`/commande/${orderId}`);
+    if (data.status === "nouvelle") return router.replace(doneUrl ?? `/commande/${orderId}`);
     setBusy(false);
     setErr(data.error ?? "Le paiement simulé n'a pas abouti.");
   }

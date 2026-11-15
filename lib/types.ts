@@ -18,6 +18,10 @@ export type Settings = {
   camping_name: string | null;
   opening_label: string | null;
   ordering_open: boolean;
+  loyalty_enabled?: boolean;
+  loyalty_goal?: number;
+  loyalty_reward_cents?: number;
+  loyalty_reward_label?: string;
   legal_name?: string | null;
   legal_address?: string | null;
   siret?: string | null;

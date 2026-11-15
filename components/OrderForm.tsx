@@ -7,12 +7,13 @@ import type { Mode } from "@/lib/types";
 type Item = { id: string; name: string; description: string | null; price_cents: number };
 type Cat = { id: string; name: string; items: Item[] };
 
-export default function OrderForm({ mode, menu, defaultLocation, defaultPhone }: { mode: Mode; menu: Cat[]; defaultLocation: string; defaultPhone: string }) {
+export default function OrderForm({ mode, menu, defaultLocation, defaultPhone, reward }: { mode: Mode; menu: Cat[]; defaultLocation: string; defaultPhone: string; reward?: { cents: number; label: string } | null }) {
   const router = useRouter();
   const [cart, setCart] = useState<Record<string, number>>({});
   const [location, setLocation] = useState(defaultLocation);
   const [note, setNote] = useState("");
   const [phone, setPhone] = useState(defaultPhone);
+  const [useReward, setUseReward] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -36,12 +37,12 @@ export default function OrderForm({ mode, menu, defaultLocation, defaultPhone }:
     const res = await fetch("/api/orders", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mode, location, note, phone, items: lines.map((l) => ({ id: l.id, qty: l.qty })) }),
+      body: JSON.stringify({ mode, location, note, phone, use_reward: useReward, items: lines.map((l) => ({ id: l.id, qty: l.qty })) }),
     });
     const data = await res.json().catch(() => ({}));
     setBusy(false);
     if (!res.ok) return setError(data.error ?? "La commande n'a pas pu être créée. Réessayez.");
-    router.push(`/paiement/${data.id}`);
+    router.push(data.paid ? `/commande/${data.id}` : `/paiement/${data.id}`);
   }
 
   return (
@@ -96,7 +97,13 @@ export default function OrderForm({ mode, menu, defaultLocation, defaultPhone }:
           <label className="lbl" htmlFor="note">Remarque (allergies, précisions)</label>
           <textarea id="note" className="in" value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} />
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: 19 }}><span>Total</span><span>{euros(total)}</span></div>
+        {reward ? (
+          <label style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: "10px 12px", borderRadius: 6, background: "#f6f5c2", border: "1px solid #d8d55a", cursor: "pointer" }}>
+            <input type="checkbox" checked={useReward} onChange={(e) => setUseReward(e.target.checked)} style={{ marginTop: 4 }} />
+            <span><strong>Utiliser ma récompense fidélité</strong><br /><span className="muted" style={{ fontSize: 14 }}>{reward.label}</span></span>
+          </label>
+        ) : null}
+        <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: 19 }}><span>Total</span><span>{euros(Math.max(0, total - (useReward && reward ? reward.cents : 0)))}</span></div>
         {error ? <p className="err" role="alert">{error}</p> : null}
         <button className="btn primary" disabled={busy}>{busy ? "Un instant…" : "Payer ma commande"}</button>
       </aside>

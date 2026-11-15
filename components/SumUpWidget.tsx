@@ -10,7 +10,7 @@ declare global {
 
 const SDK = "https://gateway.sumup.com/gateway/ecom/card/v2/sdk.js";
 
-export default function SumUpWidget({ orderId, checkoutId }: { orderId: string; checkoutId: string }) {
+export default function SumUpWidget({ orderId, checkoutId, payToken, doneUrl }: { orderId: string; checkoutId: string; payToken?: string; doneUrl?: string }) {
   const router = useRouter();
   const mounted = useRef(false);
   const [msg, setMsg] = useState("");
@@ -21,9 +21,9 @@ export default function SumUpWidget({ orderId, checkoutId }: { orderId: string; 
 
     async function verify() {
       setMsg("Vérification du paiement…");
-      const res = await fetch(`/api/orders/${orderId}/verify`, { method: "POST" });
+      const res = await fetch(`/api/orders/${orderId}/verify${payToken ? `?k=${payToken}` : ""}`, { method: "POST" });
       const data = await res.json().catch(() => ({}));
-      if (data.status === "nouvelle") router.replace(`/commande/${orderId}`);
+      if (data.status === "nouvelle") router.replace(doneUrl ?? `/commande/${orderId}`);
       else setMsg("Le paiement n'a pas abouti. Vous pouvez réessayer.");
     }
 
@@ -45,7 +45,7 @@ export default function SumUpWidget({ orderId, checkoutId }: { orderId: string; 
     s.onload = mount;
     s.onerror = () => setMsg("Le module de paiement n'a pas pu se charger. Rechargez la page.");
     document.body.appendChild(s);
-  }, [checkoutId, orderId, router]);
+  }, [checkoutId, orderId, router, payToken, doneUrl]);
 
   return (
     <div className="stack" style={{ gap: 12 }}>

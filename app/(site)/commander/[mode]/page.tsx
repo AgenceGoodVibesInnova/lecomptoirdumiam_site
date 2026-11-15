@@ -2,6 +2,8 @@ import { notFound, redirect } from "next/navigation";
 import OrderForm from "@/components/OrderForm";
 import { getMenu } from "@/lib/menu";
 import { getSettings } from "@/lib/settings";
+import { supabaseService } from "@/lib/supabase/server";
+import { loyaltyFor } from "@/lib/loyalty";
 import { supabaseServer } from "@/lib/supabase/server";
 import { isMode, MODES } from "@/lib/format";
 
@@ -24,6 +26,8 @@ export default async function CommanderMode({ params, searchParams }: { params: 
   ]);
   // L'équipe peut tester la commande même quand elle est fermée au public.
   const preview = !settings.ordering_open && !!staff;
+  const loyalty = await loyaltyFor(supabaseService(), user.id);
+  const reward = loyalty.enabled && loyalty.available > 0 ? { cents: loyalty.rewardCents, label: loyalty.rewardLabel } : null;
 
   return (
     <section>
@@ -42,6 +46,7 @@ export default async function CommanderMode({ params, searchParams }: { params: 
             mode={mode}
             defaultLocation={mode === "mobilhome" ? profile?.mobilhome ?? "" : table}
             defaultPhone={profile?.phone ?? ""}
+            reward={reward}
             menu={menu.map((c) => ({ id: c.id, name: c.name, items: c.items.filter((i) => i.available).map((i) => ({ id: i.id, name: i.name, description: i.description, price_cents: i.price_cents })) }))}
           />
         ) : (

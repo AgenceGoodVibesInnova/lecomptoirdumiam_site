@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import ProfileForm from "@/components/ProfileForm";
-import { supabaseServer } from "@/lib/supabase/server";
+import { supabaseServer, supabaseService } from "@/lib/supabase/server";
+import { loyaltyFor } from "@/lib/loyalty";
 import { dateHeure, euros, MODES, STATUTS } from "@/lib/format";
 import type { Order } from "@/lib/types";
 
@@ -17,6 +18,7 @@ export default async function Compte() {
     supabase.from("orders").select("*, order_items(*)").eq("user_id", user.id).not("paid_at", "is", null).order("created_at", { ascending: false }).limit(50),
   ]);
   const list = (orders ?? []) as Order[];
+  const loyalty = await loyaltyFor(supabaseService(), user.id);
 
   return (
     <section>
@@ -29,6 +31,21 @@ export default async function Compte() {
           </div>
           <Link href="/commander" className="btn yellow">Passer une commande</Link>
         </div>
+        {loyalty.enabled ? (
+          <div className="card" style={{ border: "2px solid var(--encre)", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+            <div className="stack" style={{ gap: 4 }}>
+              <span className="disp" style={{ fontSize: 22, fontWeight: 600 }}>Carte de fidélité</span>
+              <span className="muted" style={{ fontSize: 14 }}>
+                {loyalty.available > 0 ? `Récompense disponible : ${loyalty.rewardLabel}. À utiliser à votre prochaine commande.` : `Encore ${loyalty.goal - loyalty.stamps} commande${loyalty.goal - loyalty.stamps > 1 ? "s" : ""} pour : ${loyalty.rewardLabel}.`}
+              </span>
+            </div>
+            <div aria-label={`${loyalty.stamps} tampons sur ${loyalty.goal}`} style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {Array.from({ length: loyalty.goal }, (_, i) => (
+                <span key={i} style={{ width: 26, height: 26, borderRadius: "50%", border: "2px solid var(--encre)", background: i < loyalty.stamps ? "var(--eclair)" : "transparent" }} />
+              ))}
+            </div>
+          </div>
+        ) : null}
         <div className="grid3">
           {[
             ["/commander/mobilhome", "Au mobil-home", profile?.mobilhome ? `Livré au n° ${profile.mobilhome}` : "Livré sur votre emplacement"],
