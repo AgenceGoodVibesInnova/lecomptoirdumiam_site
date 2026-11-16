@@ -10,3 +10,6 @@ next-env.d.ts
 
 # Polices de l'aperçu de l'application (dossier nommé node_modules par Expo)
 !public/app/assets/node_modules/
+
+# Copie locale de test
+tests/.local/

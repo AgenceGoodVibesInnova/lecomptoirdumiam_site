@@ -26,7 +26,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   // Paiement simulé : accepté seulement pour une commande créée en mode simulé, tant que SumUp n'est pas branché.
   const simulated = order.is_demo && order.sumup_checkout_id.startsWith("demo-") && !sumupConfigured();
-  const paid = simulated || (!order.is_demo && (await getCheckout(order.sumup_checkout_id)).status === "PAID");
+  let paid = simulated;
+  if (!simulated && !order.is_demo) {
+    try {
+      paid = (await getCheckout(order.sumup_checkout_id)).status === "PAID";
+    } catch (e) {
+      console.error(e);
+      return NextResponse.json({ error: "Vérification du paiement impossible pour le moment. Réessayez dans un instant." }, { status: 502 });
+    }
+  }
   if (paid) {
     await markPaid(admin, id);
     return NextResponse.json({ status: "nouvelle" });

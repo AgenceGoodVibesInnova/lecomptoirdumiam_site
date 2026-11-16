@@ -10,6 +10,7 @@ export type Me = {
   settings: { ordering_open: boolean; opening_label: string | null; camping_name: string | null; hours: string | null; address: string | null; phone: string | null; ubereats_url: string | null; instagram_url: string | null } | null;
   loyalty: Loyalty;
   canOrder: boolean;
+  notice: string | null;
   staffPreview: boolean;
   staffRole: "admin" | "editeur" | "lecteur" | null;
 };

@@ -37,7 +37,11 @@ export default function AuthForm({ next, camping }: { next: string; camping: str
     if (mode === "login") {
       const { error } = await sb.auth.signInWithPassword({ email: f.email, password: f.password });
       setBusy(false);
-      if (error) return setMsg({ err: "E-mail ou mot de passe incorrect." });
+      if (error) {
+        return setMsg({ err: /confirm/i.test(error.message)
+          ? "Votre adresse e-mail n'est pas encore confirmée : cliquez sur le lien reçu par e-mail. Pas reçu ? Utilisez « Mot de passe oublié » pour recevoir un nouveau lien."
+          : "E-mail ou mot de passe incorrect." });
+      }
       router.push(next);
       router.refresh();
       return;

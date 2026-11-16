@@ -36,14 +36,14 @@ export function Field({ label, hint, password, ...p }: TextInputProps & { label:
       <Text style={S.label}>{label}</Text>
       {password ? (
         <View style={{ justifyContent: "center" }}>
-          <TextInput placeholderTextColor={C.gris} style={[S.input, { paddingRight: 52 }]} {...p} secureTextEntry={!show} autoCapitalize="none" autoCorrect={false} />
+          <TextInput accessibilityLabel={label} placeholderTextColor={C.gris} style={[S.input, { paddingRight: 52 }]} {...p} secureTextEntry={!show} autoCapitalize="none" autoCorrect={false} />
           <Pressable onPress={() => setShow((v) => !v)} accessibilityRole="button" accessibilityLabel={show ? "Masquer le mot de passe" : "Afficher le mot de passe"} hitSlop={8}
             style={{ position: "absolute", right: 6, width: 44, height: 44, alignItems: "center", justifyContent: "center" }}>
             <Ionicons name={show ? "eye-off-outline" : "eye-outline"} size={22} color={C.encre2} />
           </Pressable>
         </View>
       ) : (
-        <TextInput placeholderTextColor={C.gris} style={S.input} {...p} />
+        <TextInput accessibilityLabel={label} placeholderTextColor={C.gris} style={S.input} {...p} />
       )}
       {hint ? <Text style={S.muted}>{hint}</Text> : null}
     </View>

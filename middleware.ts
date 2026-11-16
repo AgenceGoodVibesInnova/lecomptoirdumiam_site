@@ -53,5 +53,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|logo.svg|api/sumup).*)"],
+  // Pas de middleware (ni d'appel à Supabase) pour les fichiers statiques : polices, images, aperçu de l'application.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|fonts/|app/|robots.txt|sitemap.xml|api/sumup|.*\\.(?:png|svg|jpg|jpeg|webp|ico|woff2|ttf|js|css|map)$).*)"],
 };

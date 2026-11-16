@@ -70,7 +70,7 @@ export default function Equipe() {
             {list.map((o) => (
               <View key={o.id} style={[S.card, c.status === "nouvelle" ? { borderColor: C.encre, borderWidth: 2 } : null]}>
                 <View style={[S.row, { justifyContent: "space-between", flexWrap: "wrap" }]}>
-                  <Text style={S.h3}>N° {o.number} · {heure(o.created_at)}</Text>
+                  <Text style={S.h3}>N° {o.number} <Text style={[S.muted, { textTransform: "none" }]}>· {heure(o.created_at)}</Text></Text>
                   <View style={[S.row, { gap: 6 }]}>
                     {o.is_demo ? <Pill label="Essai" tone="yellow" /> : null}
                     {!o.paid_at ? <Pill label="À encaisser" tone="red" /> : null}

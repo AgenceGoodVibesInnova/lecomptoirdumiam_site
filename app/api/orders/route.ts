@@ -21,13 +21,11 @@ export async function POST(req: Request) {
 
   const admin = supabaseService();
   const { data: settings } = await admin.from("settings").select("ordering_open").eq("id", 1).single();
-  if (!settings?.ordering_open) {
-    const { data: staff } = await admin.from("staff").select("role").eq("user_id", user.id).maybeSingle();
-    if (!staff) return NextResponse.json({ error: "La commande en ligne n'est pas encore ouverte." }, { status: 403 });
-  }
-  // Sans SumUp, seul le paiement simulé est possible, et seulement tant que la commande est fermée au public.
+  const { data: staff } = await admin.from("staff").select("role").eq("user_id", user.id).maybeSingle();
+  if (!settings?.ordering_open && !staff) return NextResponse.json({ error: "La commande en ligne n'est pas encore ouverte." }, { status: 403 });
+  // Sans SumUp, seul le paiement simulé est possible, et uniquement pour l'équipe (tests).
   const demo = !sumupConfigured();
-  if (demo && settings?.ordering_open) return NextResponse.json({ error: "Le paiement en ligne n'est pas encore configuré. Contactez le restaurant." }, { status: 503 });
+  if (demo && !staff) return NextResponse.json({ error: "Le paiement en ligne n'est pas encore configuré. Commandez directement au comptoir." }, { status: 503 });
 
   // Les prix viennent toujours de la base, jamais du navigateur.
   const { data: menuItems } = await admin

@@ -6,6 +6,7 @@ import { supabaseService } from "@/lib/supabase/server";
 import { loyaltyFor } from "@/lib/loyalty";
 import { supabaseServer } from "@/lib/supabase/server";
 import { isMode, MODES } from "@/lib/format";
+import { sumupConfigured } from "@/lib/sumup";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,8 @@ export default async function CommanderMode({ params, searchParams }: { params: 
   ]);
   // L'équipe peut tester la commande même quand elle est fermée au public.
   const preview = !settings.ordering_open && !!staff;
+  // Commande ouverte mais paiement pas encore branché : seuls les membres de l'équipe peuvent tester (paiement simulé).
+  const payReady = sumupConfigured() || !!staff;
   const loyalty = await loyaltyFor(supabaseService(), user.id);
   const reward = loyalty.enabled && loyalty.available > 0 ? { cents: loyalty.rewardCents, label: loyalty.rewardLabel } : null;
 
@@ -41,7 +44,9 @@ export default async function CommanderMode({ params, searchParams }: { params: 
             <strong>Aperçu équipe</strong> · la commande en ligne est fermée au public (Admin › Réglages). Vous la voyez parce que vous faites partie de l'équipe.
           </p>
         ) : null}
-        {settings.ordering_open || preview ? (
+        {settings.ordering_open && !payReady ? (
+          <p className="card">Le paiement en ligne est en cours d'installation. Commandez directement au comptoir en attendant. À très vite !</p>
+        ) : settings.ordering_open || preview ? (
           <OrderForm
             mode={mode}
             defaultLocation={mode === "mobilhome" ? profile?.mobilhome ?? "" : table}

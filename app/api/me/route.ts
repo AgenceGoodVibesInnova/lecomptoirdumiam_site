@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseService } from "@/lib/supabase/server";
 import { requestUser } from "@/lib/apiauth";
 import { loyaltyFor } from "@/lib/loyalty";
+import { sumupConfigured } from "@/lib/sumup";
 
 /** Profil, carte de fidélité et état de la commande en ligne, pour l'application. */
 export async function GET(req: Request) {
@@ -14,7 +15,9 @@ export async function GET(req: Request) {
     admin.from("staff").select("role").eq("user_id", user.id).maybeSingle(),
     loyaltyFor(admin, user.id),
   ]);
-  return NextResponse.json({ email: user.email, profile, settings, loyalty, canOrder: !!settings?.ordering_open || !!staff, staffPreview: !settings?.ordering_open && !!staff, staffRole: staff?.role ?? null });
+  return NextResponse.json({ email: user.email, profile, settings, loyalty, // Le public ne peut commander que si la commande est ouverte ET le paiement branché ; l'équipe peut toujours tester.
+    canOrder: (!!settings?.ordering_open && sumupConfigured()) || !!staff,
+    notice: settings?.ordering_open && !sumupConfigured() ? "Le paiement en ligne est en cours d'installation : commandez directement au comptoir en attendant" : null, staffPreview: !settings?.ordering_open && !!staff, staffRole: staff?.role ?? null });
 }
 
 /** Suppression du compte par le client lui-même (exigée par l'App Store). Les commandes restent pour la comptabilité, sans lien au compte. */

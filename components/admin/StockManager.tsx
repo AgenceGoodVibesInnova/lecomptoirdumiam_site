@@ -87,19 +87,19 @@ export default function StockManager({ items, canEdit }: { items: StockItem[]; c
       </section>
 
       <Drawer open={!!editing} title={editing === "new" ? "Ajouter un produit au stock" : "Modifier le produit"} onClose={() => setEditing(null)}>
-        {editing ? <StockForm key={editing === "new" ? "new" : editing.id} item={editing === "new" ? null : editing} defaultSection={section !== "all" ? section : "sec"} onDone={() => setEditing(null)} /> : null}
+        {editing ? <StockForm key={editing === "new" ? "new" : editing.id} item={editing === "new" ? null : editing} defaultSection={section !== "all" ? section : "sec"} onDone={(r) => { setEditing(null); if (r) toast.show(r); }} /> : null}
       </Drawer>
       {toast.node}
     </>
   );
 }
 
-function StockForm({ item, defaultSection, onDone }: { item: StockItem | null; defaultSection: string; onDone: () => void }) {
+function StockForm({ item, defaultSection, onDone }: { item: StockItem | null; defaultSection: string; onDone: (r?: Result) => void }) {
   const [state, action, pending] = useActionState<Result | null, FormData>(saveStockItem, null);
   const [buy, setBuy] = useState(centsToInput(item?.purchase_price_cents));
   const [sell, setSell] = useState(centsToInput(item?.sale_price_cents));
   const [vat, setVat] = useState(String(item?.vat_rate ?? 5.5));
-  useEffect(() => { if (state?.ok) onDone(); }, [state, onDone]);
+  useEffect(() => { if (state?.ok) onDone(state); }, [state, onDone]);
 
   const calc = useMemo(() => {
     const b = buy ? Math.round(Number(buy.replace(",", ".")) * 100) : null;
@@ -132,7 +132,7 @@ function StockForm({ item, defaultSection, onDone }: { item: StockItem | null; d
         </div>
       ) : null}
       <Flash result={state} />
-      <div className="a-form-actions"><button type="button" className="a-btn" onClick={onDone}>Annuler</button><button className="a-btn primary" disabled={pending}>{pending ? "Enregistrement…" : item ? "Enregistrer" : "Ajouter au stock"}</button></div>
+      <div className="a-form-actions"><button type="button" className="a-btn" onClick={() => onDone()}>Annuler</button><button className="a-btn primary" disabled={pending}>{pending ? "Enregistrement…" : item ? "Enregistrer" : "Ajouter au stock"}</button></div>
     </form>
   );
 }

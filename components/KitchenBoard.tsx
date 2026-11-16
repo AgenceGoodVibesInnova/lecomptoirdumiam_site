@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { notifyReady, setOrderStatus } from "@/app/admin/actions";
@@ -22,6 +22,25 @@ export default function KitchenBoard({ canEdit }: { canEdit: boolean }) {
   const [, tick] = useState(0);
   const toast = useToast();
 
+  const known = useRef<Set<string> | null>(null);
+  const [fresh, setFresh] = useState(0);
+
+  // Petit signal sonore quand une nouvelle commande arrive (si le navigateur l'autorise).
+  const ding = () => {
+    try {
+      const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!Ctx) return;
+      const ctx = new Ctx();
+      [880, 1175].forEach((f, i) => {
+        const o = ctx.createOscillator(); const g = ctx.createGain();
+        o.frequency.value = f; o.connect(g); g.connect(ctx.destination);
+        const t0 = ctx.currentTime + i * 0.18;
+        g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.25, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.16);
+        o.start(t0); o.stop(t0 + 0.17);
+      });
+    } catch { /* son non disponible */ }
+  };
+
   const load = useCallback(async () => {
     const since = new Date(Date.now() - 864e5).toISOString();
     const { data } = await supabaseBrowser()
@@ -29,7 +48,14 @@ export default function KitchenBoard({ canEdit }: { canEdit: boolean }) {
       .or("paid_at.not.is.null,source.eq.equipe")
       .or(`status.in.(nouvelle,en_preparation,prete),and(status.eq.annulee,updated_at.gte.${since})`)
       .order("created_at");
-    setOrders((data ?? []) as Order[]);
+    const list = (data ?? []) as Order[];
+    const nouvelles = list.filter((o) => o.status === "nouvelle").map((o) => o.id);
+    if (known.current) {
+      const arrived = nouvelles.filter((id) => !known.current!.has(id)).length;
+      if (arrived) { ding(); setFresh((n) => n + arrived); }
+    }
+    known.current = new Set(list.map((o) => o.id));
+    setOrders(list);
   }, []);
 
   useEffect(() => {
@@ -39,8 +65,11 @@ export default function KitchenBoard({ canEdit }: { canEdit: boolean }) {
       .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => load())
       .subscribe((s) => setLive(s === "SUBSCRIBED"));
     const t = setInterval(() => { tick((n) => n + 1); }, 30000);
-    const r = setInterval(load, 60000);
-    return () => { clearInterval(t); clearInterval(r); sb.removeChannel(ch); };
+    // Filet de sécurité : rechargement toutes les 15 s, au cas où le direct serait coupé.
+    const r = setInterval(load, 15000);
+    const back = () => { if (document.visibilityState === "visible") load(); };
+    document.addEventListener("visibilitychange", back);
+    return () => { clearInterval(t); clearInterval(r); document.removeEventListener("visibilitychange", back); sb.removeChannel(ch); };
   }, [load]);
 
   const move = (o: Order, to: OrderStatus) => start(async () => {
@@ -54,11 +83,19 @@ export default function KitchenBoard({ canEdit }: { canEdit: boolean }) {
     toast.show(r);
     await load();
   });
+  // Nombre de nouvelles commandes dans le titre de l'onglet, visible même depuis un autre onglet.
+  const nbNew = orders.filter((o) => o.status === "nouvelle").length;
+  useEffect(() => {
+    document.title = nbNew ? `(${nbNew}) Écran cuisine · Le Comptoir du Miam` : "Écran cuisine · Le Comptoir du Miam";
+  }, [nbNew]);
+  useEffect(() => { if (!fresh) return; const t = setTimeout(() => setFresh(0), 8000); return () => clearTimeout(t); }, [fresh]);
+
   const minutes = (iso: string) => Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <span className="a-muted" style={{ fontSize: 12 }}>{live ? "● Connecté en direct · les nouvelles commandes apparaissent seules" : "○ Connexion…"}</span>
+      <span className="a-muted" style={{ fontSize: 12 }}>{live ? "● En direct · les nouvelles commandes apparaissent seules, avec un signal sonore" : "○ Mise à jour automatique toutes les 15 secondes"}</span>
+      {fresh ? <p className="a-flash ok" role="status" style={{ fontWeight: 600 }}>{fresh > 1 ? `${fresh} nouvelles commandes !` : "Nouvelle commande !"}</p> : null}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12, alignItems: "start" }}>
         {COLS.map((c) => {
           const col = orders.filter((o) => o.status === c.status);

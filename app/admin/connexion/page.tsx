@@ -9,7 +9,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ r
     <div style={{ minHeight: "100vh", background: "var(--encre)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 16px" }}>
       <div className="stack" style={{ width: "100%", maxWidth: 420, background: "var(--sable)", borderRadius: 10, padding: "32px 28px", gap: 18 }}>
         <div className="stack" style={{ alignItems: "center", textAlign: "center", gap: 10 }}>
-          <img src="/logo.svg" alt="Le Comptoir du Miam" style={{ width: 140 }} />
+          <img src="/logo.svg" alt="Le Comptoir du Miam" width={140} height={115} />
           <span className="badge" style={{ background: "var(--encre)", color: "var(--eclair)" }}>Espace administratif</span>
           <h1 className="disp" style={{ fontSize: 34 }}>Connexion</h1>
         </div>

@@ -7,6 +7,7 @@ export default async function SiteHeader() {
     <header className="top">
       <div className="wrap">
         <Link href="/" className="brand">Le Comptoir du Miam</Link>
+        <Link href="/commander" className="btn primary small top-cta">Commander</Link>
         <nav className="nav" aria-label="Navigation principale">
           <Link href="/carte">La carte</Link>
           <Link href="/#epicerie">L'épicerie</Link>

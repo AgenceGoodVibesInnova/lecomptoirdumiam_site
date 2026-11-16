@@ -55,7 +55,7 @@ export type StockItem = {
   sale_price_cents: number | null;
   supplier: string | null;
 };
-export type OrderItem = { id: string; name: string; unit_price_cents: number; quantity: number; vat_rate?: number };
+export type OrderItem = { id: string; name: string; unit_price_cents: number; quantity: number; vat_rate?: number; menu_item_id?: string | null };
 export type Order = {
   id: string;
   number: number;

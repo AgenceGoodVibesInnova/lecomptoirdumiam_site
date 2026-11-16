@@ -61,11 +61,11 @@ export default function OrderForm({ mode, menu, defaultLocation, defaultPhone, r
                 </div>
                 {cart[i.id] ? (
                   <>
-                    <button type="button" className="btn small" onClick={() => add(i.id, -1)} aria-label={`Retirer un ${i.name}`}>−</button>
+                    <button type="button" className="btn qty" onClick={() => add(i.id, -1)} aria-label={`Retirer un ${i.name}`}>−</button>
                     <span className="disp" style={{ fontSize: 20, minWidth: 20, textAlign: "center" }}>{cart[i.id]}</span>
                   </>
                 ) : null}
-                <button type="button" className="btn primary small" onClick={() => add(i.id, 1)} aria-label={`Ajouter ${i.name}`}>+</button>
+                <button type="button" className="btn primary qty" onClick={() => add(i.id, 1)} aria-label={`Ajouter ${i.name}`}>+</button>
               </div>
             ))}
           </div>
@@ -73,7 +73,14 @@ export default function OrderForm({ mode, menu, defaultLocation, defaultPhone, r
         {!items.length ? <p className="muted">Aucun article disponible pour le moment.</p> : null}
       </div>
 
-      <aside className="card stack" style={{ position: "sticky", top: 84, gap: 14 }}>
+      {lines.length ? (
+        <a href="#panier" className="cartbar" aria-label={`Voir mon panier : ${lines.reduce((s, l) => s + l.qty, 0)} articles, ${euros(total)}`}>
+          <span className="cartbar-n">{lines.reduce((s, l) => s + l.qty, 0)}</span>
+          <span>Voir mon panier</span>
+          <strong>{euros(total)}</strong>
+        </a>
+      ) : null}
+      <aside id="panier" className="card stack" style={{ position: "sticky", top: 84, gap: 14, scrollMarginTop: 90 }}>
         <h2 className="disp" style={{ fontSize: 24 }}>Ma commande</h2>
         {lines.length ? (
           <div className="stack" style={{ gap: 6, fontSize: 15 }}>

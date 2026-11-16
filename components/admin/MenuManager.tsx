@@ -91,23 +91,23 @@ export default function MenuManager({ categories, items, stock, canEdit }: { cat
       })}
 
       <Drawer open={!!editing} title={editing === "new" ? "Ajouter un produit" : "Modifier le produit"} onClose={() => setEditing(null)}>
-        {editing ? <ItemForm key={editing === "new" ? "new" : editing.id} item={editing === "new" ? null : editing} defaultCat={newCat} categories={categories} stock={stock} onDone={() => setEditing(null)} /> : null}
+        {editing ? <ItemForm key={editing === "new" ? "new" : editing.id} item={editing === "new" ? null : editing} defaultCat={newCat} categories={categories} stock={stock} onDone={(r) => { setEditing(null); if (r) toast.show(r); }} /> : null}
       </Drawer>
       <Drawer open={!!catEdit} title={catEdit === "new" ? "Nouvelle catégorie" : "Modifier la catégorie"} onClose={() => setCatEdit(null)}>
-        {catEdit ? <CategoryForm key={catEdit === "new" ? "new" : catEdit.id} cat={catEdit === "new" ? null : catEdit} onDone={() => setCatEdit(null)} /> : null}
+        {catEdit ? <CategoryForm key={catEdit === "new" ? "new" : catEdit.id} cat={catEdit === "new" ? null : catEdit} onDone={(r) => { setCatEdit(null); if (r) toast.show(r); }} /> : null}
       </Drawer>
       {toast.node}
     </>
   );
 }
 
-function ItemForm({ item, defaultCat, categories, stock, onDone }: { item: MenuItem | null; defaultCat: string; categories: MenuCategory[]; stock: Stock[]; onDone: () => void }) {
+function ItemForm({ item, defaultCat, categories, stock, onDone }: { item: MenuItem | null; defaultCat: string; categories: MenuCategory[]; stock: Stock[]; onDone: (r?: Result) => void }) {
   const [state, action, pending] = useActionState<Result | null, FormData>(saveMenuItem, null);
   const [price, setPrice] = useState(centsToInput(item?.price_cents));
   const [vat, setVat] = useState(String(item?.vat_rate ?? 10));
   const [cost, setCost] = useState(centsToInput(item?.cost_cents));
   const [stockId, setStockId] = useState(item?.stock_item_id ?? "");
-  useEffect(() => { if (state?.ok) onDone(); }, [state, onDone]);
+  useEffect(() => { if (state?.ok) onDone(state); }, [state, onDone]);
 
   const calc = useMemo(() => {
     const p = Math.round(Number(price.replace(",", ".")) * 100);
@@ -137,14 +137,14 @@ function ItemForm({ item, defaultCat, categories, stock, onDone }: { item: MenuI
       ) : null}
       <label className="a-check"><input type="checkbox" name="available" defaultChecked={item ? item.available : true} /> Disponible à la vente</label>
       <Flash result={state} />
-      <div className="a-form-actions"><button type="button" className="a-btn" onClick={onDone}>Annuler</button><button className="a-btn primary" disabled={pending}>{pending ? "Enregistrement…" : item ? "Enregistrer" : "Ajouter à la carte"}</button></div>
+      <div className="a-form-actions"><button type="button" className="a-btn" onClick={() => onDone()}>Annuler</button><button className="a-btn primary" disabled={pending}>{pending ? "Enregistrement…" : item ? "Enregistrer" : "Ajouter à la carte"}</button></div>
     </form>
   );
 }
 
-function CategoryForm({ cat, onDone }: { cat: MenuCategory | null; onDone: () => void }) {
+function CategoryForm({ cat, onDone }: { cat: MenuCategory | null; onDone: (r?: Result) => void }) {
   const [state, action, pending] = useActionState<Result | null, FormData>(saveCategory, null);
-  useEffect(() => { if (state?.ok) onDone(); }, [state, onDone]);
+  useEffect(() => { if (state?.ok) onDone(state); }, [state, onDone]);
   return (
     <form action={action} className="a-form">
       <input type="hidden" name="id" value={cat?.id ?? ""} />
@@ -153,7 +153,7 @@ function CategoryForm({ cat, onDone }: { cat: MenuCategory | null; onDone: () =>
       <Field label="Ordre d'affichage" htmlFor="c-pos"><input id="c-pos" name="position" inputMode="numeric" defaultValue={cat?.position ?? 10} /></Field>
       <label className="a-check"><input type="checkbox" name="active" defaultChecked={cat ? cat.active : true} /> Visible sur le site</label>
       <Flash result={state} />
-      <div className="a-form-actions"><button type="button" className="a-btn" onClick={onDone}>Annuler</button><button className="a-btn primary" disabled={pending}>{pending ? "Enregistrement…" : "Enregistrer"}</button></div>
+      <div className="a-form-actions"><button type="button" className="a-btn" onClick={() => onDone()}>Annuler</button><button className="a-btn primary" disabled={pending}>{pending ? "Enregistrement…" : "Enregistrer"}</button></div>
     </form>
   );
 }

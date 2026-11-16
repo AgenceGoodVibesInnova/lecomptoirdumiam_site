@@ -11,7 +11,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const since = new Date(Date.now() - jours * 864e5).toISOString();
 
   const [{ data: orders }, { count: clients }, { data: stock }, { count: aTraiter }] = await Promise.all([
-    supabase.from("orders").select("id, mode, total_cents, created_at, status, order_items(name, quantity, unit_price_cents)").not("paid_at", "is", null).neq("status", "annulee").gte("created_at", since),
+    supabase.from("orders").select("id, mode, total_cents, created_at, status, order_items(name, quantity, unit_price_cents, menu_item_id)").not("paid_at", "is", null).neq("status", "annulee").gte("created_at", since),
     supabase.from("profiles").select("id", { count: "exact", head: true }),
     supabase.from("stock_items").select("name, quantity, alert_threshold"),
     supabase.from("orders").select("id", { count: "exact", head: true }).in("status", ["nouvelle", "en_preparation"]).not("paid_at", "is", null),
@@ -29,7 +29,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const byMode = (Object.keys(MODES) as Mode[]).map((m) => ({ m, v: list.filter((o) => o.mode === m).reduce((s, o) => s + o.total_cents, 0), n: list.filter((o) => o.mode === m).length }));
   const maxMode = Math.max(1, ...byMode.map((x) => x.v));
   const products = new Map<string, { q: number; v: number }>();
-  list.forEach((o) => o.order_items?.forEach((i) => { const p = products.get(i.name) ?? { q: 0, v: 0 }; products.set(i.name, { q: p.q + i.quantity, v: p.v + i.quantity * i.unit_price_cents }); }));
+  list.forEach((o) => o.order_items?.filter((i) => i.menu_item_id).forEach((i) => { const p = products.get(i.name) ?? { q: 0, v: 0 }; products.set(i.name, { q: p.q + i.quantity, v: p.v + i.quantity * i.unit_price_cents }); }));
   const top = [...products.entries()].sort((a, b) => b[1].v - a[1].v).slice(0, 6);
   const alertes = (stock ?? []).filter((s) => Number(s.quantity) <= Number(s.alert_threshold));
 

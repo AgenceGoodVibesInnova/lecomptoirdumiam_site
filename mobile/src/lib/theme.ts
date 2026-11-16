@@ -9,7 +9,7 @@ export const C = {
   encre: "#272725",
   encre2: "#4b4742",
   eclair: "#dfdf3e",
-  olive: "#6b6a22",
+  olive: "#5e5d1d",
   rouge: "#a3361f",
   vert: "#2f6b2a",
   gris: "#8a8478",

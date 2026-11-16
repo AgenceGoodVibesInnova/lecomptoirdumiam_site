@@ -85,7 +85,7 @@ export function inviteEmail(link: string, role: string) {
         "Choisissez votre mot de passe pour accéder aux commandes, à la carte et aux stocks.",
       ],
       primary: { label: "Choisir mon mot de passe", url: link },
-      note: "Ce lien est personnel et expire au bout de 24 heures.",
+      note: "Ce lien est personnel et ne fonctionne qu'une seule fois.",
     }),
   };
 }

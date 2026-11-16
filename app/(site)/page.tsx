@@ -36,7 +36,7 @@ export default async function Home() {
               <Link href="/carte" className="btn">Découvrir la carte</Link>
             </div>
           </div>
-          <img src="/logo.svg" alt="Le Comptoir du Miam : planche de surf noire marquée d'un éclair jaune devant un soleil couchant" style={{ width: "100%", maxWidth: 480, justifySelf: "center" }} />
+          <img src="/logo.svg" width={488} height={403} fetchPriority="high" alt="Le Comptoir du Miam : planche de surf noire marquée d'un éclair jaune devant un soleil couchant" style={{ width: "100%", maxWidth: 480, height: "auto", justifySelf: "center" }} />
         </div>
       </section>
 
@@ -50,7 +50,7 @@ export default async function Home() {
         <div className="wrap stack" style={{ gap: 40 }}>
           <div className="stack" style={{ gap: 12 }}>
             <p className="kick">Notre mission</p>
-            <p className="disp" style={{ fontSize: "clamp(32px, 5vw, 54px)", fontWeight: 600, maxWidth: "20ch" }}>Créer des moments simples et vrais, autour d'une cuisine sincère.</p>
+            <h2 className="disp" style={{ fontSize: "clamp(32px, 5vw, 54px)", fontWeight: 600, maxWidth: "20ch" }}>Créer des moments simples et vrais, autour d'une cuisine sincère.</h2>
           </div>
           <div className="grid3">
             {[

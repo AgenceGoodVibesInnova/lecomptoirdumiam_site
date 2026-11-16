@@ -16,7 +16,7 @@ export default async function Commander() {
     <section>
       <div className="wrap stack" style={{ gap: 36, alignItems: "center" }}>
         <div className="stack" style={{ alignItems: "center", textAlign: "center", gap: 12 }}>
-          <img src="/logo.svg" alt="" style={{ width: 140 }} />
+          <img src="/logo.svg" alt="" width={140} height={115} />
           <h1 className="disp" style={{ fontSize: "clamp(40px, 6vw, 64px)" }}>Commander en ligne</h1>
           <p className="muted" style={{ margin: 0, fontSize: 19 }}>Comment voulez-vous manger aujourd'hui ?</p>
           {!s.ordering_open ? <p className="badge nouvelle" style={{ fontSize: 15 }}>La commande en ligne ouvrira avec le restaurant.</p> : null}

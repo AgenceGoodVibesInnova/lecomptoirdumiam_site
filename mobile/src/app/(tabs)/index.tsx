@@ -41,7 +41,7 @@ export default function Accueil() {
 
         {me && !me.canOrder ? (
           <View style={[S.card, { backgroundColor: "#f6f5c2", borderColor: "#d8d55a" }]}>
-            <Text style={S.body}>{me.settings?.opening_label ?? "La commande en ligne ouvrira avec le restaurant."} À très vite !</Text>
+            <Text style={S.body}>{(me.notice ?? me.settings?.opening_label ?? "La commande en ligne ouvrira avec le restaurant").replace(/[.!\s]+$/, "")}. À très vite !</Text>
           </View>
         ) : null}
         {me?.staffPreview ? (

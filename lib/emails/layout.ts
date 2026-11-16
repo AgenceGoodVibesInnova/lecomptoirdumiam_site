@@ -40,7 +40,7 @@ export function renderEmail(o: {
     <a href="${site}"><img src="${site}/logo.png" width="170" alt="Le Comptoir du Miam" style="display:block;width:170px;max-width:60%;height:auto;border:0"></a>
   </td></tr>
   <tr><td style="padding:30px 36px 6px;font-family:${FONT};color:${C.encre}">
-    ${o.kicker ? `<p style="margin:0 0 8px;font-family:${DISPLAY};font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#6b6a22;font-weight:bold">${esc(o.kicker)}</p>` : ""}
+    ${o.kicker ? `<p style="margin:0 0 8px;font-family:${DISPLAY};font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#5e5d1d;font-weight:bold">${esc(o.kicker)}</p>` : ""}
     <h1 style="margin:0 0 16px;font-family:${DISPLAY};font-size:30px;line-height:1.1;text-transform:uppercase;color:${C.encre}">${esc(o.title)}</h1>
     ${o.paragraphs.map((p) => `<p style="margin:0 0 14px;font-size:15px;line-height:1.6;color:${C.encre2}">${p}</p>`).join("")}
   </td></tr>
